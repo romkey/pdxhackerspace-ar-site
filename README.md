@@ -38,9 +38,9 @@ Same URLs as above (`http://localhost:3000`). The image serves `public/` with ng
 
 All runtime configuration (calendar feed URL, Home Assistant credentials, printer definitions) lives in a `.env` file next to `docker-compose.yml`. The file is gitignored — copy `.env.example` to `.env` and edit it. If `.env` is missing the stack still boots with built-in defaults; the printer page will simply report that Home Assistant isn't configured until you fill in the values.
 
-## Wall clock AR (QR + hex anchor poster)
+## Wall clock AR (QR + anchor poster)
 
-This is the main flow: a QR code opens the AR page; a **clock hex anchor** (`anchor-clock`) on the same poster tells the camera where to draw the clock on the wall.
+This is the main flow: a QR code opens the AR page; a **clock anchor** (`anchor-clock`) on the same poster tells the camera where to draw the clock on the wall.
 
 1. `npm start` and open [poster.html](http://localhost:3000/poster.html) on your computer.
 2. Set **Public URL** to something your phone can reach (e.g. `https://192.168.1.x:3000` with HTTPS, or your deployed domain).
@@ -52,7 +52,7 @@ The clock is rendered by `public/js/wall-display.js`. Add more rows later with `
 
 ## Events dashboard AR
 
-[events.html](http://localhost:3000/events.html) overlays the next few upcoming events from an iCalendar feed on a **calendar hex anchor** (`anchor-events`). Open it on your phone, point at the marker, and you'll see the live time plus a configurable number of upcoming events. Print the anchor at **60 mm** square for wall mounting.
+[events.html](http://localhost:3000/events.html) overlays the next few upcoming events from an iCalendar feed on a **calendar anchor** (`anchor-events`). Open it on your phone, point at the marker, and you'll see the live time plus a configurable number of upcoming events. Print the anchor at **60 mm** square for wall mounting.
 
 ### Configuration
 
@@ -85,7 +85,7 @@ For local `npm start` there is no proxy, so the events page only works against a
 
 ## Printer status AR (Home Assistant)
 
-[printer.html](http://localhost:3000/printer.html) overlays live Prusa printer status — name, file, progress, ETA, material, nozzle, hot end and bed temperatures — on **hex-badge AR anchors** stuck to each printer. The data comes from a Home Assistant instance (the [PrusaLink](https://www.home-assistant.io/integrations/prusalink/) integration exposes those sensors).
+[printer.html](http://localhost:3000/printer.html) overlays live Prusa printer status — name, file, progress, ETA, material, nozzle, hot end and bed temperatures — on **AR anchors** stuck to each printer. The data comes from a Home Assistant instance (the [PrusaLink](https://www.home-assistant.io/integrations/prusalink/) integration exposes those sensors).
 
 ### Why a backend?
 
@@ -107,7 +107,7 @@ For a PrusaLink device named `prusa_mk4`, use `PRINTER_0_SENSOR_PREFIX=sensor.pr
 
 ### Multiple printers
 
-Configure up to seven printers with env vars (`PRINTER_0_NAME`, `PRINTER_0_SENSOR_PREFIX`, … through `PRINTER_6_*`). Each printer gets a unique **hex anchor label** (`anchor-0` … `anchor-6`); pointing the camera at a label loads that printer's status automatically.
+Configure up to seven printers with env vars (`PRINTER_0_NAME`, `PRINTER_0_SENSOR_PREFIX`, … through `PRINTER_6_*`). Each printer gets a unique **anchor label** (`anchor-0` … `anchor-6`); pointing the camera at a label loads that printer's status automatically.
 
 1. Open [marker-labels.html](http://localhost:3000/marker-labels.html) and print the sheet on matte label stock (default **23 mm** square).
 2. Stick `anchor-0` on printer 0, `anchor-1` on printer 1, and so on.
@@ -149,15 +149,15 @@ AR.js ships separate builds — use only what you need:
 
 This project starts with **marker-based** AR because it needs no GPS and no custom image descriptors.
 
-### Hex-badge anchors (custom pattern markers)
+### Anchors (custom pattern markers)
 
-This project uses a shared **hex outline + unique glyph** scheme for AR anchors. Markers live in `markers/` at the repo root and are generated with:
+This project uses square AR.js pattern markers with a **unique glyph** per anchor. Markers live in `markers/` at the repo root and are generated with:
 
 ```bash
 npm run markers
 ```
 
-This reads glyph definitions from `scripts/markers/glyphs.mjs` and writes printable PNGs, AR.js `.patt` pattern files, and `markers/manifest.json`. Edit `MARKER_CONFIG.sizeMm` in `glyphs.mjs` if you change label size (and update the matching `size=` attribute on `<a-marker>` elements).
+This reads glyph definitions from `scripts/markers/glyphs.mjs` and writes printable PNGs, AR.js `.patt` pattern files, and `markers/manifest.json`. Glyphs are drawn large on the inner pattern area (`patternRatio` defaults to `0.72`). Edit `MARKER_CONFIG.sizeMm` in `glyphs.mjs` if you change label size (and update the matching `size=` attribute on `<a-marker>` elements).
 
 For local dev, `public/markers` is a symlink to `../markers` so `npm start` serves them at `/markers/…`. Docker copies `markers/` into the image directly.
 

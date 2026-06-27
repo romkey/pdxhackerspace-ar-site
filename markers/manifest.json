@@ -1,8 +1,8 @@
 {
   "version": 1,
-  "scheme": "hex-badge",
+  "scheme": "anchor",
   "sizeMm": 23,
-  "patternRatio": 0.5,
+  "patternRatio": 0.72,
   "sizeMeters": 0.023,
   "markers": [
     {

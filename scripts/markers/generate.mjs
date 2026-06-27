@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 /**
- * Generate hex-badge AR.js pattern markers (PNG + .patt + manifest).
+ * Generate anchor AR.js pattern markers (PNG + .patt + manifest).
  *
  * Run: npm run markers
  * Output: markers/ (repo root)
@@ -116,7 +116,7 @@ async function main() {
   const { patternRatio, outputPx, sizeMm } = MARKER_CONFIG;
   const manifest = {
     version: 1,
-    scheme: "hex-badge",
+    scheme: "anchor",
     sizeMm,
     patternRatio,
     sizeMeters: sizeMm / 1000,
