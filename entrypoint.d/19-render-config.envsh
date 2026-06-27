@@ -1,0 +1,55 @@
+# Renders /usr/share/nginx/html/js/config.js and exports the CALENDAR_*
+# env vars that nginx's 20-envsubst-on-templates.sh expects when rendering
+# /etc/nginx/templates/default.conf.template.
+#
+# This file uses .envsh so the nginx entrypoint *sources* it: env-var
+# exports made here are visible to the subsequent template hook.
+
+: "${CALENDAR_ICS_URL:=https://events.pdxhackerspace.org/calendar.ics}"
+: "${CALENDAR_EVENT_COUNT:=3}"
+: "${CALENDAR_BROWSER_URL:=/feed/calendar.ics}"
+
+# Derive the host portion of CALENDAR_ICS_URL for the proxy's Host header
+# (so upstream HTTPS vhost / SNI routing works).
+CALENDAR_ICS_HOST=$(printf '%s' "$CALENDAR_ICS_URL" | sed -nE 's#^[a-zA-Z]+://([^/:]+).*#\1#p')
+: "${CALENDAR_ICS_HOST:=localhost}"
+
+export CALENDAR_ICS_URL CALENDAR_ICS_HOST CALENDAR_EVENT_COUNT CALENDAR_BROWSER_URL
+
+# Printer page browser-side config. The HA token / base URL never leave
+# the container; only the *names* of configured printers (and the polling
+# interval) reach the browser so it can label and refresh the page.
+: "${PRINTER_REFRESH_SECONDS:=10}"
+
+# Build a JS array literal of { id, name } objects for every PRINTER_<N>_NAME
+# we find. Up to 32 printers are scanned.
+PRINTERS_JS_ARRAY="["
+sep=""
+i=0
+while [ "$i" -lt 32 ]; do
+    name_var="PRINTER_${i}_NAME"
+    prefix_var="PRINTER_${i}_SENSOR_PREFIX"
+    eval "name=\${$name_var:-}"
+    eval "prefix=\${$prefix_var:-}"
+    if [ -n "$name" ] || [ -n "$prefix" ]; then
+        # JSON-escape the display name (quotes + backslashes only — names
+        # don't realistically contain control chars).
+        escaped_name=$(printf '%s' "${name:-Printer $i}" | sed -e 's/\\/\\\\/g' -e 's/"/\\"/g')
+        PRINTERS_JS_ARRAY="${PRINTERS_JS_ARRAY}${sep}{ \"id\": ${i}, \"name\": \"${escaped_name}\" }"
+        sep=", "
+    fi
+    i=$((i + 1))
+done
+PRINTERS_JS_ARRAY="${PRINTERS_JS_ARRAY}]"
+
+export PRINTER_REFRESH_SECONDS PRINTERS_JS_ARRAY
+
+if [ -f /usr/share/nginx/html/js/config.template.js ]; then
+    envsubst '$CALENDAR_BROWSER_URL $CALENDAR_EVENT_COUNT $PRINTER_REFRESH_SECONDS $PRINTERS_JS_ARRAY' \
+        < /usr/share/nginx/html/js/config.template.js \
+        > /usr/share/nginx/html/js/config.js
+fi
+
+echo "ar-site: CALENDAR_ICS_URL=$CALENDAR_ICS_URL (host=$CALENDAR_ICS_HOST)"
+echo "ar-site: CALENDAR_BROWSER_URL=$CALENDAR_BROWSER_URL CALENDAR_EVENT_COUNT=$CALENDAR_EVENT_COUNT"
+echo "ar-site: printers=$PRINTERS_JS_ARRAY refresh=${PRINTER_REFRESH_SECONDS}s"

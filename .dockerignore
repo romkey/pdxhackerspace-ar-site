@@ -1,0 +1,9 @@
+node_modules
+.git
+.gitignore
+.DS_Store
+cert.pem
+key.pem
+.env
+.env.example
+*.md

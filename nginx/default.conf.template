@@ -1,0 +1,58 @@
+server {
+    listen       80;
+    listen  [::]:80;
+    server_name  _;
+
+    root   /usr/share/nginx/html;
+    index  index.html;
+
+    # iCalendar proxy for the AR events dashboard. The upstream often doesn't
+    # send CORS headers, so we strip whatever it returns and add our own,
+    # giving the browser a same-origin URL to fetch.
+    location = /feed/calendar.ics {
+        # 127.0.0.11 is Docker's embedded DNS; the public resolvers are
+        # fallbacks for non-Docker hosts.
+        resolver 127.0.0.11 1.1.1.1 8.8.8.8 ipv6=off valid=300s;
+        resolver_timeout 5s;
+
+        proxy_http_version 1.1;
+        proxy_ssl_server_name on;
+        proxy_ssl_protocols TLSv1.2 TLSv1.3;
+        proxy_set_header Host ${CALENDAR_ICS_HOST};
+        proxy_set_header User-Agent "ar-site";
+        proxy_set_header Accept "text/calendar, text/plain, */*";
+
+        proxy_hide_header Access-Control-Allow-Origin;
+        proxy_hide_header Access-Control-Allow-Methods;
+        proxy_hide_header Access-Control-Allow-Headers;
+        proxy_hide_header Set-Cookie;
+
+        add_header Access-Control-Allow-Origin "*" always;
+        add_header Cache-Control "public, max-age=60" always;
+
+        proxy_pass ${CALENDAR_ICS_URL};
+    }
+
+    # Printer status backend. Runs as a Node process bound to loopback
+    # only — the HA bearer token lives there, so the browser can never
+    # see it. Nginx is the only thing that can reach the backend.
+    location /api/ {
+        proxy_http_version 1.1;
+        proxy_set_header Host $host;
+        proxy_set_header Connection "";
+        proxy_pass http://127.0.0.1:3001;
+        add_header Cache-Control "no-store" always;
+    }
+
+    # Don't let browsers cache our JS — config.js can change between
+    # container restarts, and the rest is small enough that aggressive
+    # caching only hides bugs during iteration.
+    location ~* ^/js/.+\.js$ {
+        add_header Cache-Control "no-store" always;
+        try_files $uri =404;
+    }
+
+    location / {
+        try_files $uri $uri/ =404;
+    }
+}

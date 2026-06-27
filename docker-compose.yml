@@ -1,0 +1,22 @@
+services:
+  web:
+    build: .
+#    ports:
+#      - "3000:80"
+    hostname: ar
+    container_name: ar
+    restart: unless-stopped
+    # Runtime configuration lives in `.env` (same directory). Copy
+    # `.env.example` to `.env` and edit it. The file is optional — if
+    # absent the site boots with built-in defaults and the printer page
+    # shows "HA_BASE_URL is not configured" until you fill it in.
+    env_file:
+      - path: .env
+        required: false
+    networks:
+      - proxy
+
+networks:
+  proxy:
+    name: nginx-proxy-net
+    external: true

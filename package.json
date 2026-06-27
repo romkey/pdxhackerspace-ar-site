@@ -1,0 +1,19 @@
+{
+  "name": "ar-site",
+  "private": true,
+  "version": "0.1.0",
+  "description": "Augmented reality web app powered by AR.js",
+  "scripts": {
+    "start": "serve public -p 3000",
+    "start:https": "serve public -p 3000 --ssl-cert cert.pem --ssl-key key.pem",
+    "markers": "node scripts/markers/generate.mjs",
+    "lint": "eslint ."
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.39.1",
+    "eslint": "^9.39.1",
+    "globals": "^16.5.0",
+    "serve": "^14.2.4",
+    "sharp": "^0.35.2"
+  }
+}

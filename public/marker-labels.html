@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Hex anchor labels — print sheet</title>
+    <style>
+      :root {
+        font-family: system-ui, sans-serif;
+        line-height: 1.4;
+        --label-mm: 23;
+      }
+      body {
+        margin: 0;
+        padding: 1.5rem;
+        background: #f4f4f5;
+      }
+      main {
+        max-width: 48rem;
+        margin: 0 auto;
+        background: #fff;
+        border-radius: 8px;
+        padding: 1.5rem;
+        box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08);
+      }
+      h1 {
+        font-size: 1.25rem;
+        font-weight: 600;
+        margin: 0 0 0.5rem;
+      }
+      p {
+        margin: 0 0 1rem;
+        color: #444;
+        font-size: 0.9rem;
+      }
+      .controls {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.75rem;
+        align-items: center;
+        margin-bottom: 1.25rem;
+        font-size: 0.875rem;
+      }
+      label {
+        display: flex;
+        align-items: center;
+        gap: 0.35rem;
+      }
+      input[type="number"] {
+        width: 4rem;
+        padding: 0.35rem 0.5rem;
+        border: 1px solid #ccc;
+        border-radius: 6px;
+        font: inherit;
+      }
+      .sheet {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(calc(var(--label-mm) * 1mm + 8mm), 1fr));
+        gap: 6mm;
+        padding: 4mm;
+        border: 2px dashed #ccc;
+        border-radius: 8px;
+      }
+      .label {
+        text-align: center;
+        break-inside: avoid;
+      }
+      .label img {
+        width: calc(var(--label-mm) * 1mm);
+        height: calc(var(--label-mm) * 1mm);
+        display: block;
+        margin: 0 auto;
+        image-rendering: pixelated;
+      }
+      .label figcaption {
+        margin-top: 2mm;
+        font-size: 8pt;
+        color: #333;
+      }
+      .label .glyph {
+        font-weight: 600;
+      }
+      .no-print {
+        margin-top: 1rem;
+        font-size: 0.875rem;
+      }
+      @media print {
+        body {
+          background: #fff;
+          padding: 0;
+        }
+        main {
+          box-shadow: none;
+          max-width: none;
+          padding: 0;
+        }
+        .controls,
+        .no-print {
+          display: none;
+        }
+        .sheet {
+          border: none;
+          padding: 0;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <h1>Hex anchor labels</h1>
+      <p>
+        Print these on matte label stock and stick one on each printer. Each glyph is a
+        unique AR anchor (<code>anchor-0</code> … <code>anchor-6</code>) that opens that
+        printer&rsquo;s status in <a href="printer.html">printer.html</a>.
+      </p>
+
+      <div class="controls">
+        <label>
+          Label size (mm)
+          <input id="label-mm" type="number" min="15" max="80" step="1" value="23" />
+        </label>
+        <button type="button" onclick="window.print()">Print</button>
+      </div>
+
+      <section class="sheet" id="sheet" aria-label="Printable anchor labels"></section>
+
+      <p class="no-print">
+        <a href="printer.html">Open printer AR</a> · <a href="index.html">Home</a>
+      </p>
+    </main>
+
+    <script>
+      (function () {
+        var sheet = document.getElementById("sheet");
+        var sizeInput = document.getElementById("label-mm");
+
+        function render() {
+          document.documentElement.style.setProperty(
+            "--label-mm",
+            String(parseInt(sizeInput.value, 10) || 23)
+          );
+          sheet.innerHTML = "";
+
+          fetch("markers/manifest.json", { cache: "no-store" })
+            .then(function (res) {
+              return res.json();
+            })
+            .then(function (manifest) {
+              manifest.markers.forEach(function (marker) {
+                var figure = document.createElement("figure");
+                figure.className = "label";
+
+                var img = document.createElement("img");
+                img.src = "markers/" + marker.image;
+                img.width = 512;
+                img.height = 512;
+                img.alt = marker.slug + " AR anchor (" + marker.name + " glyph)";
+
+                var caption = document.createElement("figcaption");
+                caption.innerHTML =
+                  '<span class="glyph">' +
+                  marker.name +
+                  "</span><br><code>" +
+                  marker.slug +
+                  "</code> · printer " +
+                  marker.id;
+
+                figure.appendChild(img);
+                figure.appendChild(caption);
+                sheet.appendChild(figure);
+              });
+            })
+            .catch(function (err) {
+              sheet.textContent = "Could not load markers/manifest.json";
+              console.error(err);
+            });
+        }
+
+        sizeInput.addEventListener("input", render);
+        render();
+      })();
+    </script>
+  </body>
+</html>

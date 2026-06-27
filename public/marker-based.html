@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" />
+    <title>Marker-based AR</title>
+    <script src="https://aframe.io/releases/1.6.0/aframe.min.js"></script>
+    <script src="https://raw.githack.com/AR-js-org/AR.js/3.4.8/aframe/build/aframe-ar.js"></script>
+    <style>
+      body {
+        margin: 0;
+        overflow: hidden;
+      }
+      .hint {
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        padding: 0.75rem 1rem;
+        background: rgba(0, 0, 0, 0.65);
+        color: #fff;
+        font: 0.875rem/1.4 system-ui, sans-serif;
+        text-align: center;
+        z-index: 1;
+        pointer-events: none;
+      }
+      .hint a {
+        color: #9cf;
+      }
+    </style>
+  </head>
+  <body>
+    <p class="hint">
+      Print or display the
+      <a href="https://raw.githubusercontent.com/AR-js-org/AR.js/master/data/images/hiro.png" target="_blank" rel="noopener">Hiro marker</a>
+      and point your camera at it.
+    </p>
+
+    <a-scene
+      embedded
+      arjs="sourceType: webcam; debugUIEnabled: false;"
+      vr-mode-ui="enabled: false"
+      renderer="logarithmicDepthBuffer: true; precision: medium;"
+    >
+      <a-marker preset="hiro" emitevents="true">
+        <a-box
+          position="0 0.25 0"
+          rotation="0 45 0"
+          scale="0.5 0.5 0.5"
+          material="color: #4CC3D9; metalness: 0.2;"
+        ></a-box>
+        <a-text
+          value="Hello AR"
+          align="center"
+          color="#FFF"
+          position="0 1 0"
+          scale="2 2 2"
+        ></a-text>
+      </a-marker>
+
+      <a-entity camera></a-entity>
+    </a-scene>
+  </body>
+</html>

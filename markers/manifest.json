@@ -1,0 +1,65 @@
+{
+  "version": 1,
+  "scheme": "hex-badge",
+  "sizeMm": 23,
+  "patternRatio": 0.5,
+  "sizeMeters": 0.023,
+  "markers": [
+    {
+      "id": "0",
+      "slug": "anchor-0",
+      "name": "Triangle",
+      "image": "anchor-0.png",
+      "pattern": "anchor-0.patt",
+      "glyph": "triangle"
+    },
+    {
+      "id": "1",
+      "slug": "anchor-1",
+      "name": "Arrow",
+      "image": "anchor-1.png",
+      "pattern": "anchor-1.patt",
+      "glyph": "arrow"
+    },
+    {
+      "id": "2",
+      "slug": "anchor-2",
+      "name": "Orbit",
+      "image": "anchor-2.png",
+      "pattern": "anchor-2.patt",
+      "glyph": "orbit"
+    },
+    {
+      "id": "3",
+      "slug": "anchor-3",
+      "name": "Corner",
+      "image": "anchor-3.png",
+      "pattern": "anchor-3.patt",
+      "glyph": "corner"
+    },
+    {
+      "id": "4",
+      "slug": "anchor-4",
+      "name": "Slash",
+      "image": "anchor-4.png",
+      "pattern": "anchor-4.patt",
+      "glyph": "slash"
+    },
+    {
+      "id": "5",
+      "slug": "anchor-5",
+      "name": "Fork",
+      "image": "anchor-5.png",
+      "pattern": "anchor-5.patt",
+      "glyph": "fork"
+    },
+    {
+      "id": "6",
+      "slug": "anchor-6",
+      "name": "Crescent",
+      "image": "anchor-6.png",
+      "pattern": "anchor-6.patt",
+      "glyph": "crescent"
+    }
+  ]
+}

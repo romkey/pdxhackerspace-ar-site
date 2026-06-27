@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>AR wall clock — print poster</title>
+    <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.4/build/qrcode.min.js"></script>
+    <style>
+      :root {
+        font-family: system-ui, sans-serif;
+        line-height: 1.4;
+      }
+      body {
+        margin: 0;
+        padding: 1.5rem;
+        background: #f4f4f5;
+      }
+      main {
+        max-width: 28rem;
+        margin: 0 auto;
+        background: #fff;
+        border-radius: 8px;
+        padding: 1.5rem;
+        box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08);
+      }
+      h1 {
+        font-size: 1.25rem;
+        font-weight: 600;
+        margin: 0 0 0.5rem;
+      }
+      .controls {
+        margin: 1rem 0;
+        display: grid;
+        gap: 0.5rem;
+      }
+      label {
+        font-size: 0.875rem;
+        font-weight: 500;
+      }
+      input {
+        width: 100%;
+        box-sizing: border-box;
+        padding: 0.5rem 0.6rem;
+        border: 1px solid #ccc;
+        border-radius: 6px;
+        font: inherit;
+      }
+      .poster {
+        margin-top: 1.25rem;
+        border: 2px dashed #ccc;
+        border-radius: 8px;
+        padding: 1.25rem;
+        text-align: center;
+      }
+      .poster h2 {
+        margin: 0 0 0.25rem;
+        font-size: 1.125rem;
+      }
+      .poster p {
+        margin: 0 0 1rem;
+        color: #444;
+        font-size: 0.9rem;
+      }
+      #qrcode {
+        display: inline-block;
+        margin-bottom: 1rem;
+      }
+      #qrcode canvas,
+      #qrcode img {
+        display: block;
+        width: 180px;
+        height: 180px;
+      }
+      .hiro {
+        width: 200px;
+        height: auto;
+        image-rendering: pixelated;
+      }
+      .caption {
+        margin-top: 0.75rem;
+        font-size: 0.8rem;
+        color: #666;
+        word-break: break-all;
+      }
+      .no-print {
+        margin-top: 1rem;
+        font-size: 0.875rem;
+        color: #555;
+      }
+      @media print {
+        body {
+          background: #fff;
+          padding: 0;
+        }
+        main {
+          box-shadow: none;
+          max-width: none;
+          padding: 0;
+        }
+        .controls,
+        .no-print {
+          display: none;
+        }
+        .poster {
+          border: none;
+          padding: 0;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <h1>Print poster</h1>
+      <p>
+        Mount this on a wall. Visitors scan the QR code to open the AR page, then point the
+        camera at the Hiro marker to see a live clock overlaid on the poster.
+      </p>
+
+      <div class="controls">
+        <label for="base-url">Public URL of this site (used in the QR code)</label>
+        <input id="base-url" type="url" placeholder="https://your-domain.example" />
+      </div>
+
+      <section class="poster" aria-label="Printable poster">
+        <h2>Wall clock</h2>
+        <p>Scan to open · point camera at marker below</p>
+        <div id="qrcode" aria-hidden="true"></div>
+        <img
+          class="hiro"
+          src="https://raw.githubusercontent.com/AR-js-org/AR.js/master/data/images/hiro.png"
+          width="512"
+          height="512"
+          alt="Hiro AR marker"
+        />
+        <p class="caption" id="target-url"></p>
+      </section>
+
+      <p class="no-print">
+        <button type="button" onclick="window.print()">Print poster</button>
+        · <a href="wall-clock.html">Open AR page</a>
+        · <a href="index.html">Home</a>
+      </p>
+    </main>
+
+    <script>
+      (function () {
+        var input = document.getElementById("base-url");
+        var qrHost = document.getElementById("qrcode");
+        var caption = document.getElementById("target-url");
+
+        function defaultBase() {
+          if (location.protocol === "http:" || location.protocol === "https:") {
+            return location.origin;
+          }
+          return "";
+        }
+
+        function targetUrl() {
+          var base = (input.value || defaultBase()).replace(/\/$/, "");
+          return base ? base + "/wall-clock.html" : "";
+        }
+
+        function renderQr() {
+          var url = targetUrl();
+          caption.textContent = url || "Enter your public site URL above to generate the QR code.";
+          qrHost.innerHTML = "";
+          if (!url) return;
+          QRCode.toCanvas(
+            url,
+            { width: 360, margin: 2, errorCorrectionLevel: "M" },
+            function (err, canvas) {
+              if (err) {
+                caption.textContent = "Could not generate QR code.";
+                console.error(err);
+                return;
+              }
+              qrHost.appendChild(canvas);
+            }
+          );
+        }
+
+        input.value = defaultBase();
+        input.addEventListener("input", renderQr);
+        renderQr();
+      })();
+    </script>
+  </body>
+</html>

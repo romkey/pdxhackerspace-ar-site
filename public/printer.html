@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" />
+    <title>AR printer status</title>
+    <script src="https://aframe.io/releases/1.6.0/aframe.min.js"></script>
+    <script src="https://raw.githack.com/AR-js-org/AR.js/3.4.8/aframe/build/aframe-ar.js"></script>
+    <script src="js/config.js"></script>
+    <script src="js/wall-display.js"></script>
+    <script src="js/printer-source.js"></script>
+    <style>
+      body {
+        margin: 0;
+        overflow: hidden;
+      }
+      .hint {
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        padding: 0.75rem 1rem;
+        background: rgba(0, 0, 0, 0.7);
+        color: #fff;
+        font: 0.875rem/1.4 system-ui, sans-serif;
+        text-align: center;
+        z-index: 1;
+        transition: opacity 0.25s ease;
+      }
+      .hint.is-hidden {
+        opacity: 0;
+        pointer-events: none;
+      }
+    </style>
+  </head>
+  <body>
+    <p class="hint" id="hint">
+      Point your camera at the hex anchor on a printer to see its status.
+    </p>
+
+    <!--
+      Hex-badge anchors: anchor-0 … anchor-6 map to printer ids 0 … 6.
+      Regenerate markers with `npm run markers` — see markers/manifest.json.
+      Print labels: marker-labels.html
+    -->
+    <a-scene
+      embedded
+      arjs="sourceType: webcam; debugUIEnabled: false;"
+      vr-mode-ui="enabled: false"
+      renderer="logarithmicDepthBuffer: true; precision: medium;"
+    >
+      <a-assets>
+        <a-mixin
+          id="printer-status-overlay"
+          position="0 0.95 0"
+          rotation="-90 0 0"
+        ></a-mixin>
+        <a-mixin
+          id="printer-status-panel"
+          geometry="primitive: plane; width: 1.9; height: 1.2"
+          material="color: #0d1117; opacity: 0.92; transparent: true; shader: flat"
+        ></a-mixin>
+        <a-mixin
+          id="printer-status-text"
+          wall-display
+          align="center"
+          color="#f0f6fc"
+          width="3.0"
+          wrap-count="32"
+          baseline="center"
+          position="0 0 0.01"
+          scale="1 1 1"
+        ></a-mixin>
+      </a-assets>
+
+      <a-marker
+        id="printer-marker-0"
+        type="pattern"
+        url="markers/anchor-0.patt"
+        size="0.023"
+        data-printer-id="0"
+        emitevents="true"
+        smooth="true"
+        smoothCount="5"
+      >
+        <a-entity mixin="printer-status-overlay">
+          <a-plane mixin="printer-status-panel"></a-plane>
+          <a-text mixin="printer-status-text"></a-text>
+        </a-entity>
+      </a-marker>
+
+      <a-marker
+        id="printer-marker-1"
+        type="pattern"
+        url="markers/anchor-1.patt"
+        size="0.023"
+        data-printer-id="1"
+        emitevents="true"
+        smooth="true"
+        smoothCount="5"
+      >
+        <a-entity mixin="printer-status-overlay">
+          <a-plane mixin="printer-status-panel"></a-plane>
+          <a-text mixin="printer-status-text"></a-text>
+        </a-entity>
+      </a-marker>
+
+      <a-marker
+        id="printer-marker-2"
+        type="pattern"
+        url="markers/anchor-2.patt"
+        size="0.023"
+        data-printer-id="2"
+        emitevents="true"
+        smooth="true"
+        smoothCount="5"
+      >
+        <a-entity mixin="printer-status-overlay">
+          <a-plane mixin="printer-status-panel"></a-plane>
+          <a-text mixin="printer-status-text"></a-text>
+        </a-entity>
+      </a-marker>
+
+      <a-marker
+        id="printer-marker-3"
+        type="pattern"
+        url="markers/anchor-3.patt"
+        size="0.023"
+        data-printer-id="3"
+        emitevents="true"
+        smooth="true"
+        smoothCount="5"
+      >
+        <a-entity mixin="printer-status-overlay">
+          <a-plane mixin="printer-status-panel"></a-plane>
+          <a-text mixin="printer-status-text"></a-text>
+        </a-entity>
+      </a-marker>
+
+      <a-marker
+        id="printer-marker-4"
+        type="pattern"
+        url="markers/anchor-4.patt"
+        size="0.023"
+        data-printer-id="4"
+        emitevents="true"
+        smooth="true"
+        smoothCount="5"
+      >
+        <a-entity mixin="printer-status-overlay">
+          <a-plane mixin="printer-status-panel"></a-plane>
+          <a-text mixin="printer-status-text"></a-text>
+        </a-entity>
+      </a-marker>
+
+      <a-marker
+        id="printer-marker-5"
+        type="pattern"
+        url="markers/anchor-5.patt"
+        size="0.023"
+        data-printer-id="5"
+        emitevents="true"
+        smooth="true"
+        smoothCount="5"
+      >
+        <a-entity mixin="printer-status-overlay">
+          <a-plane mixin="printer-status-panel"></a-plane>
+          <a-text mixin="printer-status-text"></a-text>
+        </a-entity>
+      </a-marker>
+
+      <a-marker
+        id="printer-marker-6"
+        type="pattern"
+        url="markers/anchor-6.patt"
+        size="0.023"
+        data-printer-id="6"
+        emitevents="true"
+        smooth="true"
+        smoothCount="5"
+      >
+        <a-entity mixin="printer-status-overlay">
+          <a-plane mixin="printer-status-panel"></a-plane>
+          <a-text mixin="printer-status-text"></a-text>
+        </a-entity>
+      </a-marker>
+
+      <a-entity camera></a-entity>
+    </a-scene>
+
+    <script>
+      (function () {
+        var hint = document.querySelector("#hint");
+        var markers = document.querySelectorAll("a-marker[data-printer-id]");
+        if (!hint || markers.length === 0) return;
+
+        markers.forEach(function (marker) {
+          marker.addEventListener("markerFound", function () {
+            hint.classList.add("is-hidden");
+            var pid = parseInt(marker.dataset.printerId, 10);
+            if (!Number.isNaN(pid) && typeof window.setActivePrinter === "function") {
+              window.setActivePrinter(pid);
+            }
+          });
+          marker.addEventListener("markerLost", function () {
+            hint.classList.remove("is-hidden");
+          });
+        });
+      })();
+    </script>
+  </body>
+</html>

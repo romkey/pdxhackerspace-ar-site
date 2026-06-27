@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>AR Site</title>
+    <style>
+      :root {
+        color-scheme: light dark;
+        font-family: system-ui, sans-serif;
+        line-height: 1.5;
+      }
+      body {
+        max-width: 40rem;
+        margin: 2rem auto;
+        padding: 0 1.25rem;
+      }
+      h1 {
+        font-size: 1.5rem;
+        font-weight: 600;
+      }
+      ul {
+        padding-left: 1.25rem;
+      }
+      a {
+        color: inherit;
+      }
+      code {
+        font-size: 0.9em;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>AR Site</h1>
+    <p>Web augmented reality demos using <a href="https://ar-js-org.github.io/AR.js-Docs/">AR.js</a> and <a href="https://aframe.io/">A-Frame</a>.</p>
+    <ul>
+      <li><a href="wall-clock.html">Wall clock AR</a> — live time on a Hiro marker (main experience)</li>
+      <li><a href="events.html">Events dashboard AR</a> — next upcoming events from an iCalendar feed</li>
+      <li><a href="printer.html">Printer status AR</a> — live Prusa printer status via Home Assistant</li>
+      <li><a href="marker-labels.html">Hex anchor labels</a> — print AR markers for each printer</li>
+      <li><a href="poster.html">Print poster</a> — QR code + Hiro marker for mounting on a wall</li>
+      <li><a href="marker-based.html">Marker demo</a> — simple cube on a Hiro marker</li>
+    </ul>
+    <p>
+      Run locally: <code>npm install && npm start</code>, then open the URL on your phone.
+      The camera requires HTTPS when not on <code>localhost</code>; use <code>npm run start:https</code> after generating certs (see README).
+    </p>
+  </body>
+</html>
