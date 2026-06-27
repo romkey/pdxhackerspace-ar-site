@@ -140,6 +140,9 @@ async function main() {
       image: `${base}.png`,
       pattern: `${base}.patt`,
       glyph: glyph.name.toLowerCase(),
+      usage: glyph.usage || null,
+      sizeMm: glyph.sizeMm ?? sizeMm,
+      sizeMeters: (glyph.sizeMm ?? sizeMm) / 1000,
     });
 
     console.log(`  ${base}  (${glyph.name})`);

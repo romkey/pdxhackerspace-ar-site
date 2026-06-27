@@ -146,7 +146,11 @@
               return res.json();
             })
             .then(function (manifest) {
-              manifest.markers.forEach(function (marker) {
+              manifest.markers
+                .filter(function (marker) {
+                  return marker.usage === "printer";
+                })
+                .forEach(function (marker) {
                 var figure = document.createElement("figure");
                 figure.className = "label";
 

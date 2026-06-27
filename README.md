@@ -38,21 +38,21 @@ Same URLs as above (`http://localhost:3000`). The image serves `public/` with ng
 
 All runtime configuration (calendar feed URL, Home Assistant credentials, printer definitions) lives in a `.env` file next to `docker-compose.yml`. The file is gitignored — copy `.env.example` to `.env` and edit it. If `.env` is missing the stack still boots with built-in defaults; the printer page will simply report that Home Assistant isn't configured until you fill in the values.
 
-## Wall clock AR (QR + Hiro poster)
+## Wall clock AR (QR + hex anchor poster)
 
-This is the main flow: a QR code opens the AR page; a **Hiro marker** on the same poster tells the camera where to draw the clock on the wall.
+This is the main flow: a QR code opens the AR page; a **clock hex anchor** (`anchor-clock`) on the same poster tells the camera where to draw the clock on the wall.
 
 1. `npm start` and open [poster.html](http://localhost:3000/poster.html) on your computer.
 2. Set **Public URL** to something your phone can reach (e.g. `https://192.168.1.x:3000` with HTTPS, or your deployed domain).
-3. Print the poster and mount it on a wall (QR on top, Hiro marker below).
+3. Print the poster and mount it on a wall (QR on top, clock anchor below — print at **60 mm** square).
 4. Scan the QR code on your phone → opens [wall-clock.html](http://localhost:3000/wall-clock.html).
-5. Allow camera access, then point at the Hiro marker. The current time updates every second while you watch.
+5. Allow camera access, then point at the clock anchor. The current time updates every second while you watch.
 
 The clock is rendered by `public/js/wall-display.js`. Add more rows later with `registerWallLine(() => '72°F')` (or async fetches) before the scene loads.
 
 ## Events dashboard AR
 
-[events.html](http://localhost:3000/events.html) is a second AR experience that overlays the next few upcoming events from an iCalendar feed on a Hiro marker. Open it on your phone, point at the marker, and you'll see the live time plus a configurable number of upcoming events.
+[events.html](http://localhost:3000/events.html) overlays the next few upcoming events from an iCalendar feed on a **calendar hex anchor** (`anchor-events`). Open it on your phone, point at the marker, and you'll see the live time plus a configurable number of upcoming events. Print the anchor at **60 mm** square for wall mounting.
 
 ### Configuration
 
@@ -161,9 +161,9 @@ This reads glyph definitions from `scripts/markers/glyphs.mjs` and writes printa
 
 For local dev, `public/markers` is a symlink to `../markers` so `npm start` serves them at `/markers/…`. Docker copies `markers/` into the image directly.
 
-Each anchor is named `anchor-<id>` so the same scheme works for printers today and other AR experiences later — map an anchor id to whatever content you need in each page's `data-*` attributes.
+Each anchor is named `anchor-<id>` so the same scheme works across experiences — printers (`anchor-0` … `anchor-6`), wall clock (`anchor-clock`), events (`anchor-events`), and more. See `markers/manifest.json` for the full list with `usage` and physical `sizeMm`.
 
-For pages still using Hiro markers (wall clock, events), see the [AR.js pattern marker tool](https://ar-js-org.github.io/AR.js/three.js/examples/marker-training/examples/generator.html) or reuse anchors from the manifest.
+For pages still using Hiro markers (the simple demo), see the [AR.js pattern marker tool](https://ar-js-org.github.io/AR.js/three.js/examples/marker-training/examples/generator.html).
 
 ## Next steps
 

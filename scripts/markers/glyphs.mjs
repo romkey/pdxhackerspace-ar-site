@@ -9,7 +9,7 @@
  * so the same scheme works for printers, tools, rooms, etc.
  */
 
-/** @typedef {{ id: string; name: string; svg: string }} AnchorGlyph */
+/** @typedef {{ id: string; name: string; svg: string; usage?: string; sizeMm?: number }} AnchorGlyph */
 
 const SIZE = 512;
 const CX = SIZE / 2;
@@ -51,6 +51,8 @@ export const ANCHOR_GLYPHS = [
   {
     id: "0",
     name: "Triangle",
+    usage: "printer",
+    sizeMm: 23,
     svg: innerSvg(`
       <polygon points="256,150 330,340 182,340" fill="#000000"/>
     `),
@@ -58,6 +60,8 @@ export const ANCHOR_GLYPHS = [
   {
     id: "1",
     name: "Arrow",
+    usage: "printer",
+    sizeMm: 23,
     svg: innerSvg(`
       <polygon points="300,256 210,190 210,225 160,225 160,287 210,287 210,322" fill="#000000"/>
     `),
@@ -65,6 +69,8 @@ export const ANCHOR_GLYPHS = [
   {
     id: "2",
     name: "Orbit",
+    usage: "printer",
+    sizeMm: 23,
     svg: innerSvg(`
       <circle cx="256" cy="268" r="72" fill="none" stroke="#000000" stroke-width="36"/>
       <circle cx="318" cy="210" r="28" fill="#000000"/>
@@ -73,6 +79,8 @@ export const ANCHOR_GLYPHS = [
   {
     id: "3",
     name: "Corner",
+    usage: "printer",
+    sizeMm: 23,
     svg: innerSvg(`
       <path d="M 170 340 L 170 220 L 290 220 L 290 270 L 220 270 L 220 340 Z" fill="#000000"/>
     `),
@@ -80,6 +88,8 @@ export const ANCHOR_GLYPHS = [
   {
     id: "4",
     name: "Slash",
+    usage: "printer",
+    sizeMm: 23,
     svg: innerSvg(`
       <rect x="188" y="188" width="36" height="180" rx="4" transform="rotate(-35 256 256)" fill="#000000"/>
       <circle cx="330" cy="182" r="32" fill="#000000"/>
@@ -88,6 +98,8 @@ export const ANCHOR_GLYPHS = [
   {
     id: "5",
     name: "Fork",
+    usage: "printer",
+    sizeMm: 23,
     svg: innerSvg(`
       <rect x="170" y="232" width="180" height="36" fill="#000000"/>
       <rect x="232" y="170" width="36" height="180" fill="#000000"/>
@@ -97,9 +109,37 @@ export const ANCHOR_GLYPHS = [
   {
     id: "6",
     name: "Crescent",
+    usage: "printer",
+    sizeMm: 23,
     svg: innerSvg(`
       <path d="M 320 256 A 80 80 0 1 1 320 255.9 Z" fill="#000000"/>
       <circle cx="268" cy="256" r="62" fill="#ffffff"/>
+    `),
+  },
+  {
+    id: "clock",
+    name: "Clock",
+    usage: "wall-clock",
+    sizeMm: 60,
+    svg: innerSvg(`
+      <circle cx="256" cy="256" r="88" fill="none" stroke="#000000" stroke-width="26"/>
+      <line x1="256" y1="256" x2="218" y2="192" stroke="#000000" stroke-width="30" stroke-linecap="round"/>
+      <line x1="256" y1="256" x2="318" y2="288" stroke="#000000" stroke-width="18" stroke-linecap="round"/>
+      <circle cx="256" cy="256" r="12" fill="#000000"/>
+    `),
+  },
+  {
+    id: "events",
+    name: "Calendar",
+    usage: "events",
+    sizeMm: 60,
+    svg: innerSvg(`
+      <rect x="168" y="158" width="176" height="196" rx="10" fill="none" stroke="#000000" stroke-width="26"/>
+      <rect x="168" y="158" width="176" height="52" fill="#000000"/>
+      <rect x="188" y="228" width="52" height="48" fill="#000000"/>
+      <rect x="248" y="228" width="52" height="48" fill="none" stroke="#000000" stroke-width="14"/>
+      <rect x="188" y="284" width="52" height="48" fill="none" stroke="#000000" stroke-width="14"/>
+      <rect x="248" y="284" width="52" height="48" fill="none" stroke="#000000" stroke-width="14"/>
     `),
   },
 ];

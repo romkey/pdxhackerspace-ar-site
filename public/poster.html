@@ -71,9 +71,9 @@
         width: 180px;
         height: 180px;
       }
-      .hiro {
-        width: 200px;
-        height: auto;
+      .anchor {
+        width: 60mm;
+        height: 60mm;
         image-rendering: pixelated;
       }
       .caption {
@@ -113,7 +113,7 @@
       <h1>Print poster</h1>
       <p>
         Mount this on a wall. Visitors scan the QR code to open the AR page, then point the
-        camera at the Hiro marker to see a live clock overlaid on the poster.
+        camera at the clock hex anchor below to see a live clock overlaid on the poster.
       </p>
 
       <div class="controls">
@@ -126,11 +126,11 @@
         <p>Scan to open · point camera at marker below</p>
         <div id="qrcode" aria-hidden="true"></div>
         <img
-          class="hiro"
-          src="https://raw.githubusercontent.com/AR-js-org/AR.js/master/data/images/hiro.png"
+          class="anchor"
+          src="markers/anchor-clock.png"
           width="512"
           height="512"
-          alt="Hiro AR marker"
+          alt="Clock hex AR anchor"
         />
         <p class="caption" id="target-url"></p>
       </section>

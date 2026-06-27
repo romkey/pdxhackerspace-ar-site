@@ -11,7 +11,10 @@
       "name": "Triangle",
       "image": "anchor-0.png",
       "pattern": "anchor-0.patt",
-      "glyph": "triangle"
+      "glyph": "triangle",
+      "usage": "printer",
+      "sizeMm": 23,
+      "sizeMeters": 0.023
     },
     {
       "id": "1",
@@ -19,7 +22,10 @@
       "name": "Arrow",
       "image": "anchor-1.png",
       "pattern": "anchor-1.patt",
-      "glyph": "arrow"
+      "glyph": "arrow",
+      "usage": "printer",
+      "sizeMm": 23,
+      "sizeMeters": 0.023
     },
     {
       "id": "2",
@@ -27,7 +33,10 @@
       "name": "Orbit",
       "image": "anchor-2.png",
       "pattern": "anchor-2.patt",
-      "glyph": "orbit"
+      "glyph": "orbit",
+      "usage": "printer",
+      "sizeMm": 23,
+      "sizeMeters": 0.023
     },
     {
       "id": "3",
@@ -35,7 +44,10 @@
       "name": "Corner",
       "image": "anchor-3.png",
       "pattern": "anchor-3.patt",
-      "glyph": "corner"
+      "glyph": "corner",
+      "usage": "printer",
+      "sizeMm": 23,
+      "sizeMeters": 0.023
     },
     {
       "id": "4",
@@ -43,7 +55,10 @@
       "name": "Slash",
       "image": "anchor-4.png",
       "pattern": "anchor-4.patt",
-      "glyph": "slash"
+      "glyph": "slash",
+      "usage": "printer",
+      "sizeMm": 23,
+      "sizeMeters": 0.023
     },
     {
       "id": "5",
@@ -51,7 +66,10 @@
       "name": "Fork",
       "image": "anchor-5.png",
       "pattern": "anchor-5.patt",
-      "glyph": "fork"
+      "glyph": "fork",
+      "usage": "printer",
+      "sizeMm": 23,
+      "sizeMeters": 0.023
     },
     {
       "id": "6",
@@ -59,7 +77,32 @@
       "name": "Crescent",
       "image": "anchor-6.png",
       "pattern": "anchor-6.patt",
-      "glyph": "crescent"
+      "glyph": "crescent",
+      "usage": "printer",
+      "sizeMm": 23,
+      "sizeMeters": 0.023
+    },
+    {
+      "id": "clock",
+      "slug": "anchor-clock",
+      "name": "Clock",
+      "image": "anchor-clock.png",
+      "pattern": "anchor-clock.patt",
+      "glyph": "clock",
+      "usage": "wall-clock",
+      "sizeMm": 60,
+      "sizeMeters": 0.06
+    },
+    {
+      "id": "events",
+      "slug": "anchor-events",
+      "name": "Calendar",
+      "image": "anchor-events.png",
+      "pattern": "anchor-events.patt",
+      "glyph": "calendar",
+      "usage": "events",
+      "sizeMm": 60,
+      "sizeMeters": 0.06
     }
   ]
 }
