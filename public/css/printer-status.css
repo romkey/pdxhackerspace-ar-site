@@ -1,0 +1,133 @@
+.printer-hud {
+  position: fixed;
+  top: 10vh;
+  left: 10vw;
+  width: 80vw;
+  height: 80vh;
+  box-sizing: border-box;
+  z-index: 3;
+  display: flex;
+  align-items: stretch;
+  justify-content: center;
+  padding: 0;
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  transition:
+    opacity 0.3s ease,
+    visibility 0.3s ease;
+}
+
+.printer-hud.is-visible {
+  opacity: 1;
+  visibility: visible;
+}
+
+.printer-hud__panel {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  padding: clamp(1rem, 3vw, 1.75rem) clamp(1.1rem, 3.5vw, 2rem);
+  border-radius: clamp(12px, 2vw, 20px);
+  background: rgba(13, 17, 23, 0.62);
+  border: 1px solid rgba(240, 246, 252, 0.14);
+  box-shadow:
+    0 8px 32px rgba(0, 0, 0, 0.35),
+    inset 0 1px 0 rgba(255, 255, 255, 0.06);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  color: #f0f6fc;
+  font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+  line-height: 1.45;
+  overflow: hidden;
+}
+
+.printer-hud__name {
+  margin: 0 0 0.35em;
+  font-size: clamp(1.5rem, 5vw, 2.25rem);
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  line-height: 1.15;
+}
+
+.printer-hud__status {
+  margin: 0 0 0.75rem;
+  font-size: clamp(1.1rem, 3.6vw, 1.5rem);
+  font-weight: 600;
+  color: #8b949e;
+}
+
+.printer-hud__status.is-active {
+  color: #3fb950;
+}
+
+.printer-hud__status.is-error {
+  color: #f85149;
+}
+
+.printer-hud__progress {
+  height: clamp(6px, 1.2vw, 10px);
+  margin: 0 0 1.25rem;
+  border-radius: 999px;
+  background: rgba(240, 246, 252, 0.12);
+  overflow: hidden;
+}
+
+.printer-hud__progress-bar {
+  height: 100%;
+  border-radius: inherit;
+  background: linear-gradient(90deg, #238636, #3fb950);
+  transition: width 0.4s ease;
+}
+
+.printer-hud__details {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  font-size: clamp(0.95rem, 2.8vw, 1.2rem);
+}
+
+.printer-hud__detail {
+  padding: 0.55em 0;
+  border-bottom: 1px solid rgba(240, 246, 252, 0.08);
+  color: #c9d1d9;
+  word-break: break-word;
+}
+
+.printer-hud__detail:last-child {
+  border-bottom: none;
+}
+
+.printer-hud__detail--muted {
+  color: #8b949e;
+  font-size: 0.92em;
+}
+
+.printer-hud__detail--temp {
+  font-variant-numeric: tabular-nums;
+}
+
+.printer-hud__detail-label {
+  display: block;
+  font-size: 0.78em;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: #6e7681;
+  margin-bottom: 0.15em;
+}
+
+@media (max-height: 500px) {
+  .printer-hud {
+    top: 8vh;
+    height: 84vh;
+  }
+
+  .printer-hud__panel {
+    padding: 0.85rem 1rem;
+  }
+}

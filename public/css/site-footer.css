@@ -1,0 +1,48 @@
+.site-footer {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  z-index: 2;
+  padding: 0.5rem 0.75rem;
+  font: 0.8125rem/1.4 system-ui, sans-serif;
+  pointer-events: none;
+}
+
+.site-footer a {
+  pointer-events: auto;
+  color: inherit;
+  text-decoration: none;
+  opacity: 0.75;
+}
+
+.site-footer a:hover {
+  opacity: 1;
+  text-decoration: underline;
+}
+
+@media (prefers-color-scheme: dark) {
+  .site-footer a {
+    color: #e6edf3;
+  }
+}
+
+body.ar-page .site-footer a {
+  color: #fff;
+  opacity: 0.85;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.85);
+}
+
+body.ar-page .site-footer a:hover {
+  opacity: 1;
+}
+
+/* AR pages: keep the tracking hint above the footer link */
+body.ar-page .hint {
+  bottom: 2rem;
+}
+
+@media print {
+  .site-footer {
+    display: none;
+  }
+}

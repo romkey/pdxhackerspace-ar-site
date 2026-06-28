@@ -247,6 +247,10 @@
     return cachedLines.join("\n");
   }
 
+  window.getPrinterStatusLines = function () {
+    return cachedLines.slice();
+  };
+
   // Exposed so printer.html (or a future marker-routing layer) can switch
   // which printer is being shown without reloading the page.
   window.setActivePrinter = function (id) {

@@ -12,17 +12,19 @@ export default [
   },
   js.configs.recommended,
   {
-    files: ["server/**/*.js", "scripts/**/*.mjs"],
+    files: ["server/**/*.js", "test/**/*.js"],
     languageOptions: {
       ecmaVersion: 2022,
-      sourceType: "module",
+      sourceType: "commonjs",
       globals: globals.node,
     },
   },
   {
-    files: ["server/server.js"],
+    files: ["scripts/**/*.mjs", "test/**/*.mjs"],
     languageOptions: {
-      sourceType: "commonjs",
+      ecmaVersion: 2022,
+      sourceType: "module",
+      globals: globals.node,
     },
   },
   {

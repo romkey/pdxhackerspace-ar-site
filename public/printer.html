@@ -4,11 +4,13 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" />
     <title>AR printer status</title>
+    <link rel="stylesheet" href="css/printer-status.css" />
+    <link rel="stylesheet" href="css/site-footer.css" />
     <script src="https://aframe.io/releases/1.6.0/aframe.min.js"></script>
     <script src="https://raw.githack.com/AR-js-org/AR.js/3.4.8/aframe/build/aframe-ar.js"></script>
     <script src="js/config.js"></script>
-    <script src="js/wall-display.js"></script>
     <script src="js/printer-source.js"></script>
+    <script src="js/printer-hud.js"></script>
     <style>
       body {
         margin: 0;
@@ -33,10 +35,21 @@
       }
     </style>
   </head>
-  <body>
+  <body class="ar-page">
     <p class="hint" id="hint">
       Point your camera at the anchor on a printer to see its status.
     </p>
+
+    <div id="printer-hud" class="printer-hud" aria-live="polite" aria-atomic="true">
+      <div class="printer-hud__panel">
+        <h1 class="printer-hud__name">Printer</h1>
+        <p class="printer-hud__status">Loading…</p>
+        <div class="printer-hud__progress" hidden>
+          <div class="printer-hud__progress-bar" style="width: 0%"></div>
+        </div>
+        <ul class="printer-hud__details"></ul>
+      </div>
+    </div>
 
     <!--
       Anchors anchor-0 … anchor-6 map to printer ids 0 … 6.
@@ -49,30 +62,6 @@
       vr-mode-ui="enabled: false"
       renderer="logarithmicDepthBuffer: true; precision: medium;"
     >
-      <a-assets>
-        <a-mixin
-          id="printer-status-overlay"
-          position="0 0.95 0"
-          rotation="-90 0 0"
-        ></a-mixin>
-        <a-mixin
-          id="printer-status-panel"
-          geometry="primitive: plane; width: 1.9; height: 1.2"
-          material="color: #0d1117; opacity: 0.92; transparent: true; shader: flat"
-        ></a-mixin>
-        <a-mixin
-          id="printer-status-text"
-          wall-display
-          align="center"
-          color="#f0f6fc"
-          width="3.0"
-          wrap-count="32"
-          baseline="center"
-          position="0 0 0.01"
-          scale="1 1 1"
-        ></a-mixin>
-      </a-assets>
-
       <a-marker
         id="printer-marker-0"
         type="pattern"
@@ -82,12 +71,7 @@
         emitevents="true"
         smooth="true"
         smoothCount="5"
-      >
-        <a-entity mixin="printer-status-overlay">
-          <a-plane mixin="printer-status-panel"></a-plane>
-          <a-text mixin="printer-status-text"></a-text>
-        </a-entity>
-      </a-marker>
+      ></a-marker>
 
       <a-marker
         id="printer-marker-1"
@@ -98,12 +82,7 @@
         emitevents="true"
         smooth="true"
         smoothCount="5"
-      >
-        <a-entity mixin="printer-status-overlay">
-          <a-plane mixin="printer-status-panel"></a-plane>
-          <a-text mixin="printer-status-text"></a-text>
-        </a-entity>
-      </a-marker>
+      ></a-marker>
 
       <a-marker
         id="printer-marker-2"
@@ -114,12 +93,7 @@
         emitevents="true"
         smooth="true"
         smoothCount="5"
-      >
-        <a-entity mixin="printer-status-overlay">
-          <a-plane mixin="printer-status-panel"></a-plane>
-          <a-text mixin="printer-status-text"></a-text>
-        </a-entity>
-      </a-marker>
+      ></a-marker>
 
       <a-marker
         id="printer-marker-3"
@@ -130,12 +104,7 @@
         emitevents="true"
         smooth="true"
         smoothCount="5"
-      >
-        <a-entity mixin="printer-status-overlay">
-          <a-plane mixin="printer-status-panel"></a-plane>
-          <a-text mixin="printer-status-text"></a-text>
-        </a-entity>
-      </a-marker>
+      ></a-marker>
 
       <a-marker
         id="printer-marker-4"
@@ -146,12 +115,7 @@
         emitevents="true"
         smooth="true"
         smoothCount="5"
-      >
-        <a-entity mixin="printer-status-overlay">
-          <a-plane mixin="printer-status-panel"></a-plane>
-          <a-text mixin="printer-status-text"></a-text>
-        </a-entity>
-      </a-marker>
+      ></a-marker>
 
       <a-marker
         id="printer-marker-5"
@@ -162,12 +126,7 @@
         emitevents="true"
         smooth="true"
         smoothCount="5"
-      >
-        <a-entity mixin="printer-status-overlay">
-          <a-plane mixin="printer-status-panel"></a-plane>
-          <a-text mixin="printer-status-text"></a-text>
-        </a-entity>
-      </a-marker>
+      ></a-marker>
 
       <a-marker
         id="printer-marker-6"
@@ -178,12 +137,7 @@
         emitevents="true"
         smooth="true"
         smoothCount="5"
-      >
-        <a-entity mixin="printer-status-overlay">
-          <a-plane mixin="printer-status-panel"></a-plane>
-          <a-text mixin="printer-status-text"></a-text>
-        </a-entity>
-      </a-marker>
+      ></a-marker>
 
       <a-entity camera></a-entity>
     </a-scene>
@@ -197,6 +151,9 @@
         markers.forEach(function (marker) {
           marker.addEventListener("markerFound", function () {
             hint.classList.add("is-hidden");
+            if (typeof window.setPrinterHudVisible === "function") {
+              window.setPrinterHudVisible(true);
+            }
             var pid = parseInt(marker.dataset.printerId, 10);
             if (!Number.isNaN(pid) && typeof window.setActivePrinter === "function") {
               window.setActivePrinter(pid);
@@ -204,9 +161,13 @@
           });
           marker.addEventListener("markerLost", function () {
             hint.classList.remove("is-hidden");
+            if (typeof window.setPrinterHudVisible === "function") {
+              window.setPrinterHudVisible(false);
+            }
           });
         });
       })();
     </script>
+    <script src="js/site-footer.js"></script>
   </body>
 </html>
