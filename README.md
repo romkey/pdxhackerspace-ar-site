@@ -34,6 +34,10 @@ docker compose up --build
 
 Same URLs as above (`http://localhost:3000`). The image serves `public/` with nginx. For phone camera access over the network you still need HTTPS in front of the container (reverse proxy or tunnel), not plain HTTP.
 
+### Build version stamp
+
+Every page shows the running version in the footer (e.g. `GitHub · v0.1.6`), and the landing page shows it as a badge under the title. The value comes from `public/version.json`, which is regenerated from `package.json` at Docker build time (and on `npm version`). If the footer shows an older version than you expect, the container is running a stale image — rebuild/redeploy. Run `npm run stamp-version` after manually editing the version.
+
 ### Configuration via `.env`
 
 All runtime configuration (calendar feed URL, Home Assistant credentials, printer definitions) lives in a `.env` file next to `docker-compose.yml`. The file is gitignored — copy `.env.example` to `.env` and edit it. If `.env` is missing the stack still boots with built-in defaults; the printer page will simply report that Home Assistant isn't configured until you fill in the values.

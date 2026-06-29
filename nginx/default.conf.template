@@ -56,6 +56,13 @@ server {
         try_files $uri =404;
     }
 
+    # Never cache the build stamp — its whole job is to reveal the live build.
+    location = /version.json {
+        types { } default_type application/json;
+        add_header Cache-Control "no-store" always;
+        try_files $uri =404;
+    }
+
     location / {
         try_files $uri $uri/ =404;
     }

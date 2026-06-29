@@ -9,6 +9,13 @@ COPY public /usr/share/nginx/html
 COPY markers /usr/share/nginx/html/markers
 COPY nginx/default.conf.template /etc/nginx/templates/default.conf.template
 COPY server /app
+
+# Stamp the running build's version into version.json so the site footer and
+# landing page show exactly which image is live. Sourced from package.json at
+# build time, so a stale (un-rebuilt) image is immediately obvious.
+COPY package.json /tmp/package.json
+RUN node -e "const p=require('/tmp/package.json');require('fs').writeFileSync('/usr/share/nginx/html/version.json',JSON.stringify({name:p.name,version:p.version})+'\n')" \
+    && rm -f /tmp/package.json
 # Source path `entrypoint.d/` lives in this repo; the destination path
 # `/docker-entrypoint.d/` is where the nginx base image looks for hooks.
 COPY entrypoint.d/19-render-config.envsh /docker-entrypoint.d/19-render-config.envsh
