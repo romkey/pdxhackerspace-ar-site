@@ -18,19 +18,43 @@ const SENSOR_FIELDS = [
   ['heatbed_target_temperature', 'heatbed_target_temperature'],
 ];
 
+/**
+ * Derive a default preview camera entity from a sensor prefix.
+ * The HA PrusaLink integration exposes a `camera.<device>` thumbnail
+ * alongside the `sensor.<device>_*` sensors, so `sensor.prusa` →
+ * `camera.prusa` is a sensible default when no explicit entity is set.
+ */
+function derivePreviewEntity(prefix) {
+  if (!prefix) return '';
+  const m = /^sensor\.(.+)$/.exec(prefix);
+  return m ? `camera.${m[1]}` : '';
+}
+
 function loadPrinters(env = process.env) {
   const printers = [];
   for (let i = 0; i < 32; i++) {
     const name = env[`PRINTER_${i}_NAME`];
     const prefix = env[`PRINTER_${i}_SENSOR_PREFIX`];
     if (!name && !prefix) continue;
+    const explicitPreview = env[`PRINTER_${i}_PREVIEW_ENTITY`];
     printers.push({
       id: i,
       name: name || `Printer ${i}`,
       prefix: prefix || '',
+      preview:
+        explicitPreview != null
+          ? explicitPreview
+          : derivePreviewEntity(prefix || ''),
     });
   }
   return printers;
+}
+
+/** Pull the HA camera/image thumbnail URL out of an entity state. */
+function resolveEntityPicture(state) {
+  if (!state || !state.attributes) return null;
+  const pic = state.attributes.entity_picture;
+  return typeof pic === 'string' && pic.length > 0 ? pic : null;
 }
 
 function createFetchHAState(env = process.env) {
@@ -110,6 +134,78 @@ function createFetchHAState(env = process.env) {
   };
 }
 
+/**
+ * Returns a function that fetches an arbitrary HA path (e.g. the relative
+ * `entity_picture` camera-proxy URL) and resolves with the raw image bytes
+ * plus content type. Used to proxy print-preview thumbnails to the browser
+ * without ever exposing the HA token.
+ */
+function createFetchHABinary(env = process.env) {
+  const HA_BASE_URL = (env.HA_BASE_URL || '').replace(/\/+$/, '');
+  const HA_TOKEN = env.HA_TOKEN || '';
+  const HA_TIMEOUT_MS = parseInt(env.HA_TIMEOUT_MS, 10) || 8000;
+
+  return function fetchHABinary(haPath) {
+    return new Promise((resolve, reject) => {
+      if (!HA_BASE_URL) {
+        reject(new Error('HA_BASE_URL is not configured'));
+        return;
+      }
+      if (!HA_TOKEN) {
+        reject(new Error('HA_TOKEN is not configured'));
+        return;
+      }
+
+      let url;
+      try {
+        url = new URL(haPath, HA_BASE_URL);
+      } catch (err) {
+        reject(new Error(`Invalid preview URL ${haPath}: ${err.message}`));
+        return;
+      }
+
+      const lib = url.protocol === 'https:' ? https : http;
+      const req = lib.request(
+        {
+          method: 'GET',
+          hostname: url.hostname,
+          port: url.port || (url.protocol === 'https:' ? 443 : 80),
+          path: url.pathname + url.search,
+          headers: {
+            Authorization: `Bearer ${HA_TOKEN}`,
+            Accept: 'image/*',
+            'User-Agent': 'ar-site-printer-backend',
+          },
+          timeout: HA_TIMEOUT_MS,
+        },
+        (res) => {
+          if (res.statusCode !== 200) {
+            res.resume();
+            reject(new Error(`HA preview HTTP ${res.statusCode}`));
+            return;
+          }
+          const chunks = [];
+          res.on('data', (chunk) => chunks.push(chunk));
+          res.on('end', () => {
+            resolve({
+              contentType: res.headers['content-type'] || 'image/jpeg',
+              body: Buffer.concat(chunks),
+            });
+          });
+        }
+      );
+
+      req.on('error', (err) => {
+        reject(new Error(`HA preview request failed: ${err.message}`));
+      });
+      req.on('timeout', () => {
+        req.destroy(new Error(`HA preview timed out after ${HA_TIMEOUT_MS}ms`));
+      });
+      req.end();
+    });
+  };
+}
+
 async function getPrinterStatus(printer, fetchHAState) {
   const result = {
     id: printer.id,
@@ -144,6 +240,17 @@ async function getPrinterStatus(printer, fetchHAState) {
     })
   );
 
+  result.preview = { available: false };
+  if (printer.preview) {
+    result.preview.entity_id = printer.preview;
+    try {
+      const state = await fetchHAState(printer.preview);
+      result.preview.available = Boolean(resolveEntityPicture(state));
+    } catch (err) {
+      result.errors.preview = err.message;
+    }
+  }
+
   return result;
 }
 
@@ -164,6 +271,7 @@ function createApp(options = {}) {
   const env = options.env || process.env;
   const printers = options.printers ?? loadPrinters(env);
   const fetchHAState = options.fetchHAState ?? createFetchHAState(env);
+  const fetchHABinary = options.fetchHABinary ?? createFetchHABinary(env);
   const haConfigured = Boolean(
     options.haConfigured ?? ((env.HA_BASE_URL || '') && (env.HA_TOKEN || ''))
   );
@@ -185,6 +293,38 @@ function createApp(options = {}) {
         sendJson(res, 200, {
           printers: printers.map(({ id, name }) => ({ id, name })),
         });
+        return;
+      }
+
+      const preview = /^\/api\/printer\/(\d+)\/preview(?:\?.*)?$/.exec(url);
+      if (req.method === 'GET' && preview) {
+        const id = parseInt(preview[1], 10);
+        const printer = printers.find((p) => p.id === id);
+        if (!printer) {
+          sendJson(res, 404, { error: `No printer configured with id ${id}` });
+          return;
+        }
+        if (!printer.preview) {
+          sendJson(res, 404, { error: 'No preview configured for this printer' });
+          return;
+        }
+        try {
+          const state = await fetchHAState(printer.preview);
+          const picture = resolveEntityPicture(state);
+          if (!picture) {
+            sendJson(res, 404, { error: 'No preview image available' });
+            return;
+          }
+          const image = await fetchHABinary(picture);
+          res.writeHead(200, {
+            'Content-Type': image.contentType,
+            'Content-Length': image.body.length,
+            'Cache-Control': 'no-store',
+          });
+          res.end(image.body);
+        } catch (err) {
+          sendJson(res, 502, { error: err.message || String(err) });
+        }
         return;
       }
 
@@ -215,7 +355,10 @@ function createApp(options = {}) {
 module.exports = {
   SENSOR_FIELDS,
   loadPrinters,
+  derivePreviewEntity,
+  resolveEntityPicture,
   createFetchHAState,
+  createFetchHABinary,
   getPrinterStatus,
   createApp,
   sendJson,

@@ -85,7 +85,11 @@ For local `npm start` there is no proxy, so the events page only works against a
 
 ## Printer status AR (Home Assistant)
 
-[printer.html](http://localhost:3000/printer.html) overlays live Prusa printer status — name, file, progress, ETA, material, nozzle, hot end and bed temperatures — on **AR anchors** stuck to each printer. The data comes from a Home Assistant instance (the [PrusaLink](https://www.home-assistant.io/integrations/prusalink/) integration exposes those sensors).
+[printer.html](http://localhost:3000/printer.html) overlays live Prusa printer status on **AR anchors** stuck to each printer. It's a full-screen glass HUD (`public/js/printer-hud.js`) that fills ~80% of the viewport with a print-preview panel, a circular progress ring, nozzle/bed temperature gauges, a colour-coded state pill, ETA, and material chips. The data comes from a Home Assistant instance (the [PrusaLink](https://www.home-assistant.io/integrations/prusalink/) integration exposes those sensors). The status payload is turned into a structured view model by `public/js/printer-view.mjs` (unit-tested), so the HUD renders numbers and gauges directly instead of parsing text.
+
+### Print preview
+
+If a printer has a Home Assistant camera/image entity with the current job's thumbnail, the HUD shows it. The backend proxies it at `/api/printer/<id>/preview` so the HA token never reaches the browser. The entity is taken from `PRINTER_<N>_PREVIEW_ENTITY`, or auto-derived from the sensor prefix (`sensor.prusa` → `camera.prusa`); set the var to empty to disable. When no preview is available the panel shows a printer placeholder graphic.
 
 ### Why a backend?
 
@@ -100,6 +104,7 @@ The HA REST API requires a long-lived bearer token, which must never reach the b
 | `PRINTER_REFRESH_SECONDS` | `10` | Browser polling interval. |
 | `PRINTER_<N>_NAME` | _(unset)_ | Display name for printer N (start at 0). |
 | `PRINTER_<N>_SENSOR_PREFIX` | _(unset)_ | HA entity prefix; the backend appends `_progress`, `_filename`, `_nozzle_temperature`, etc. |
+| `PRINTER_<N>_PREVIEW_ENTITY` | _(derived)_ | HA camera/image entity for the job preview thumbnail. Defaults to `camera.<device>` derived from the sensor prefix; set empty to disable. |
 
 For a PrusaLink device named `prusa_mk4`, use `PRINTER_0_SENSOR_PREFIX=sensor.prusa_mk4`. The backend looks up the following suffixes per printer and gracefully ignores any that don't exist:
 

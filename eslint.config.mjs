@@ -34,7 +34,11 @@ export default [
     },
   },
   {
-    files: ["public/js/wall-clock.js"],
+    files: [
+      "public/js/wall-clock.js",
+      "public/js/printer-source.js",
+      "public/js/printer-hud.js",
+    ],
     languageOptions: {
       ecmaVersion: 2022,
       sourceType: "module",
@@ -46,7 +50,11 @@ export default [
   },
   {
     files: ["public/js/**/*.js"],
-    ignores: ["public/js/wall-clock.js"],
+    ignores: [
+      "public/js/wall-clock.js",
+      "public/js/printer-source.js",
+      "public/js/printer-hud.js",
+    ],
     languageOptions: {
       ecmaVersion: 2022,
       sourceType: "script",
