@@ -1,7 +1,7 @@
 {
   "name": "ar-site",
   "private": true,
-  "version": "0.1.4",
+  "version": "0.1.5",
   "description": "Augmented reality web app powered by AR.js",
   "scripts": {
     "start": "serve public -p 3000",

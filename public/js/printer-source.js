@@ -7,7 +7,7 @@
  * pulls that printer's status. A `?printer=<id>` query string overrides the
  * default at page load.
  */
-import { buildPrinterModel, buildErrorModel } from "./printer-view.mjs";
+import { buildPrinterModel, buildErrorModel } from "./printer-view.js";
 
 const VERSION = "v2";
 const config = window.AR_CONFIG || {};

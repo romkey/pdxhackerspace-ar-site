@@ -46,8 +46,12 @@ server {
 
     # Don't let browsers cache our JS — config.js can change between
     # container restarts, and the rest is small enough that aggressive
-    # caching only hides bugs during iteration.
-    location ~* ^/js/.+\.js$ {
+    # caching only hides bugs during iteration. The explicit type override
+    # is important for ES modules: the stock nginx mime.types has no .mjs
+    # entry, so without this a `.mjs` module is served as octet-stream and
+    # the browser refuses to execute it (breaking every `import`).
+    location ~* ^/js/.+\.m?js$ {
+        types { } default_type text/javascript;
         add_header Cache-Control "no-store" always;
         try_files $uri =404;
     }

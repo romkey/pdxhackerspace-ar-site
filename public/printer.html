@@ -223,24 +223,53 @@
         var markers = document.querySelectorAll("a-marker[data-printer-id]");
         if (!hint || markers.length === 0) return;
 
-        markers.forEach(function (marker) {
-          marker.addEventListener("markerFound", function () {
+        var activeMarker = null;
+
+        function show(marker) {
+          if (marker === activeMarker) return;
+          activeMarker = marker;
+          if (marker) {
             hint.classList.add("is-hidden");
             if (typeof window.setPrinterHudVisible === "function") {
               window.setPrinterHudVisible(true);
             }
             var pid = parseInt(marker.dataset.printerId, 10);
-            if (!Number.isNaN(pid) && typeof window.setActivePrinter === "function") {
+            if (
+              !Number.isNaN(pid) &&
+              typeof window.setActivePrinter === "function"
+            ) {
               window.setActivePrinter(pid);
             }
-          });
-          marker.addEventListener("markerLost", function () {
+          } else {
             hint.classList.remove("is-hidden");
             if (typeof window.setPrinterHudVisible === "function") {
               window.setPrinterHudVisible(false);
             }
+          }
+        }
+
+        markers.forEach(function (marker) {
+          marker.addEventListener("markerFound", function () {
+            show(marker);
+          });
+          marker.addEventListener("markerLost", function () {
+            if (marker === activeMarker) show(null);
           });
         });
+
+        // markerFound / markerLost are unreliable on some devices; the
+        // marker entity's object3D.visible is the per-frame source of truth.
+        function poll() {
+          var visible = null;
+          markers.forEach(function (marker) {
+            if (!visible && marker.object3D && marker.object3D.visible) {
+              visible = marker;
+            }
+          });
+          show(visible);
+          window.requestAnimationFrame(poll);
+        }
+        window.requestAnimationFrame(poll);
       })();
     </script>
     <script src="js/site-footer.js"></script>

@@ -12,7 +12,7 @@ import {
   formatFinishTime,
   buildPrinterModel,
   buildErrorModel,
-} from "../public/js/printer-view.mjs";
+} from "../public/js/printer-view.js";
 
 function sensor(state, unit) {
   return { state: String(state), attributes: unit ? { unit_of_measurement: unit } : {} };

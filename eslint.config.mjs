@@ -20,7 +20,7 @@ export default [
     },
   },
   {
-    files: ["scripts/**/*.mjs", "test/**/*.mjs", "public/js/**/*.mjs"],
+    files: ["scripts/**/*.mjs", "test/**/*.mjs"],
     languageOptions: {
       ecmaVersion: 2022,
       sourceType: "module",
@@ -28,16 +28,14 @@ export default [
     },
   },
   {
-    files: ["public/js/**/*.mjs"],
-    languageOptions: {
-      globals: globals.browser,
-    },
-  },
-  {
+    // Browser ES modules (loaded via <script type="module"> / import).
+    // Named .js (not .mjs) so static hosts always serve a JS MIME type.
     files: [
       "public/js/wall-clock.js",
+      "public/js/clock-faces.js",
       "public/js/printer-source.js",
       "public/js/printer-hud.js",
+      "public/js/printer-view.js",
     ],
     languageOptions: {
       ecmaVersion: 2022,
@@ -52,8 +50,10 @@ export default [
     files: ["public/js/**/*.js"],
     ignores: [
       "public/js/wall-clock.js",
+      "public/js/clock-faces.js",
       "public/js/printer-source.js",
       "public/js/printer-hud.js",
+      "public/js/printer-view.js",
     ],
     languageOptions: {
       ecmaVersion: 2022,

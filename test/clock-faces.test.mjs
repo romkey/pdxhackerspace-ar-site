@@ -15,7 +15,7 @@ import {
   buildOrbitSvg,
   describeArc,
   polarToCartesian,
-} from "../public/js/clock-faces.mjs";
+} from "../public/js/clock-faces.js";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const ROOT = path.resolve(__dirname, "..");
@@ -112,7 +112,7 @@ describe("wall clock page assets", () => {
   it("ships clock styles and scripts", () => {
     assert.ok(fs.existsSync(path.join(ROOT, "public/css/wall-clock.css")));
     assert.ok(fs.existsSync(path.join(ROOT, "public/js/wall-clock.js")));
-    assert.ok(fs.existsSync(path.join(ROOT, "public/js/clock-faces.mjs")));
+    assert.ok(fs.existsSync(path.join(ROOT, "public/js/clock-faces.js")));
   });
 
   it("wall-clock.html references the new clock UI", () => {
@@ -126,5 +126,13 @@ describe("wall clock page assets", () => {
     assert.match(html, /data-face="analog"/);
     assert.match(html, /data-face="digital"/);
     assert.match(html, /data-face="orbit"/);
+  });
+
+  it("wall-clock.js polls marker visibility (not just events)", () => {
+    const js = fs.readFileSync(path.join(ROOT, "public/js/wall-clock.js"), "utf8");
+    // Relying solely on markerFound/markerLost drops the overlay on some
+    // devices; object3D.visible polling is the reliable trigger.
+    assert.match(js, /object3D\.visible/);
+    assert.match(js, /requestAnimationFrame/);
   });
 });

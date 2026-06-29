@@ -6,7 +6,7 @@ import {
   getTimeParts,
   buildAnalogSvg,
   buildOrbitSvg,
-} from "./clock-faces.mjs";
+} from "./clock-faces.js";
 
 const STORAGE_KEY = "ar-site.wall-clock.face";
 
@@ -123,15 +123,31 @@ function bindMarker() {
   const hint = document.querySelector("#hint");
   if (!marker) return;
 
+  let shown = null;
+  function apply(visible) {
+    if (visible === shown) return;
+    shown = visible;
+    root.classList.toggle("is-visible", visible);
+    if (hint) hint.classList.toggle("is-hidden", visible);
+  }
+
+  // markerFound / markerLost are the fast path, but AR.js fires them
+  // inconsistently (and can drop them entirely on some devices). The marker
+  // entity's object3D.visible is toggled every frame while it is tracked, so
+  // poll that as the source of truth — this is what actually makes the clock
+  // appear when the camera sees the anchor.
   marker.addEventListener("markerFound", function () {
-    root.classList.add("is-visible");
-    if (hint) hint.classList.add("is-hidden");
+    apply(true);
+  });
+  marker.addEventListener("markerLost", function () {
+    apply(false);
   });
 
-  marker.addEventListener("markerLost", function () {
-    root.classList.remove("is-visible");
-    if (hint) hint.classList.remove("is-hidden");
-  });
+  function poll() {
+    if (marker.object3D) apply(marker.object3D.visible === true);
+    window.requestAnimationFrame(poll);
+  }
+  window.requestAnimationFrame(poll);
 }
 
 window.setWallClockVisible = function (visible) {

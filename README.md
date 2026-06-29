@@ -85,7 +85,7 @@ For local `npm start` there is no proxy, so the events page only works against a
 
 ## Printer status AR (Home Assistant)
 
-[printer.html](http://localhost:3000/printer.html) overlays live Prusa printer status on **AR anchors** stuck to each printer. It's a full-screen glass HUD (`public/js/printer-hud.js`) that fills ~80% of the viewport with a print-preview panel, a circular progress ring, nozzle/bed temperature gauges, a colour-coded state pill, ETA, and material chips. The data comes from a Home Assistant instance (the [PrusaLink](https://www.home-assistant.io/integrations/prusalink/) integration exposes those sensors). The status payload is turned into a structured view model by `public/js/printer-view.mjs` (unit-tested), so the HUD renders numbers and gauges directly instead of parsing text.
+[printer.html](http://localhost:3000/printer.html) overlays live Prusa printer status on **AR anchors** stuck to each printer. It's a full-screen glass HUD (`public/js/printer-hud.js`) that fills ~80% of the viewport with a print-preview panel, a circular progress ring, nozzle/bed temperature gauges, a colour-coded state pill, ETA, and material chips. The data comes from a Home Assistant instance (the [PrusaLink](https://www.home-assistant.io/integrations/prusalink/) integration exposes those sensors). The status payload is turned into a structured view model by `public/js/printer-view.js` (unit-tested), so the HUD renders numbers and gauges directly instead of parsing text.
 
 ### Print preview
 
