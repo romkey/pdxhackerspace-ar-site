@@ -20,7 +20,7 @@ export default [
     },
   },
   {
-    files: ["scripts/**/*.mjs", "test/**/*.mjs"],
+    files: ["scripts/**/*.mjs", "test/**/*.mjs", "public/js/**/*.mjs"],
     languageOptions: {
       ecmaVersion: 2022,
       sourceType: "module",
@@ -28,7 +28,25 @@ export default [
     },
   },
   {
+    files: ["public/js/**/*.mjs"],
+    languageOptions: {
+      globals: globals.browser,
+    },
+  },
+  {
+    files: ["public/js/wall-clock.js"],
+    languageOptions: {
+      ecmaVersion: 2022,
+      sourceType: "module",
+      globals: {
+        ...globals.browser,
+        localStorage: "readonly",
+      },
+    },
+  },
+  {
     files: ["public/js/**/*.js"],
+    ignores: ["public/js/wall-clock.js"],
     languageOptions: {
       ecmaVersion: 2022,
       sourceType: "script",

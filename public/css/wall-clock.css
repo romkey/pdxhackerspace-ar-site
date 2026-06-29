@@ -1,0 +1,159 @@
+.wall-clock {
+  position: fixed;
+  top: 10vh;
+  left: 10vw;
+  width: 80vw;
+  height: 80vh;
+  box-sizing: border-box;
+  z-index: 3;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  justify-content: center;
+  gap: clamp(0.5rem, 2vh, 1rem);
+  padding: 0;
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  transition:
+    opacity 0.3s ease,
+    visibility 0.3s ease;
+}
+
+.wall-clock.is-visible {
+  opacity: 1;
+  visibility: visible;
+  pointer-events: auto;
+}
+
+.wall-clock__picker {
+  display: flex;
+  justify-content: center;
+  gap: 0.35rem;
+  flex-wrap: wrap;
+  flex-shrink: 0;
+}
+
+.wall-clock__picker-btn {
+  appearance: none;
+  border: 1px solid rgba(240, 246, 252, 0.22);
+  background: rgba(13, 17, 23, 0.3);
+  color: #c9d1d9;
+  font: 600 0.78rem/1 system-ui, sans-serif;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+  padding: 0.45rem 0.75rem;
+  border-radius: 999px;
+  cursor: pointer;
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  transition:
+    background 0.2s ease,
+    color 0.2s ease,
+    border-color 0.2s ease;
+}
+
+.wall-clock__picker-btn:hover {
+  border-color: rgba(240, 246, 252, 0.45);
+  color: #f0f6fc;
+}
+
+.wall-clock__picker-btn[aria-selected="true"] {
+  background: rgba(240, 246, 252, 0.14);
+  border-color: rgba(240, 246, 252, 0.55);
+  color: #ffffff;
+}
+
+.wall-clock__stage {
+  flex: 1;
+  min-height: 0;
+  display: grid;
+  place-items: center;
+  position: relative;
+}
+
+.clock-face {
+  width: min(72vw, 72vh);
+  height: min(72vw, 72vh);
+  display: grid;
+  place-items: center;
+}
+
+.clock-face[hidden] {
+  display: none;
+}
+
+/* Neon analog */
+.clock-face--analog {
+  color: rgba(240, 246, 252, 0.55);
+}
+
+.clock-analog__svg {
+  width: 100%;
+  height: 100%;
+}
+
+/* Terminal digital */
+.clock-face--digital {
+  font-family: "SF Mono", "Cascadia Code", "Consolas", monospace;
+  font-variant-numeric: tabular-nums;
+  text-align: center;
+  color: #39ff14;
+  text-shadow:
+    0 0 8px rgba(57, 255, 20, 0.65),
+    0 0 24px rgba(57, 255, 20, 0.35);
+}
+
+.clock-digital__time {
+  margin: 0;
+  font-size: clamp(3rem, 14vw, 9rem);
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  line-height: 1;
+}
+
+.clock-digital__seconds {
+  margin: 0.35em 0 0;
+  font-size: clamp(1.4rem, 5vw, 3rem);
+  font-weight: 500;
+  opacity: 0.75;
+  letter-spacing: 0.12em;
+}
+
+.clock-digital__colon {
+  animation: clock-blink 1s step-end infinite;
+}
+
+@keyframes clock-blink {
+  50% {
+    opacity: 0.25;
+  }
+}
+
+/* Orbit */
+.clock-face--orbit {
+  color: rgba(240, 246, 252, 0.5);
+}
+
+.clock-orbit__svg {
+  width: 100%;
+  height: 100%;
+}
+
+.clock-orbit__label {
+  fill: #f0f6fc;
+  font: 600 11px system-ui, sans-serif;
+  letter-spacing: 0.08em;
+}
+
+@media (max-height: 500px) {
+  .wall-clock {
+    top: 8vh;
+    height: 84vh;
+  }
+
+  .clock-face {
+    width: min(68vw, 68vh);
+    height: min(68vw, 68vh);
+  }
+}

@@ -48,7 +48,7 @@ This is the main flow: a QR code opens the AR page; a **clock anchor** (`anchor-
 4. Scan the QR code on your phone → opens [wall-clock.html](http://localhost:3000/wall-clock.html).
 5. Allow camera access, then point at the clock anchor. The current time updates every second while you watch.
 
-The clock is rendered by `public/js/wall-display.js`. Add more rows later with `registerWallLine(() => '72°F')` (or async fetches) before the scene loads.
+The clock is a full-screen HUD (`public/js/wall-clock.js`) with three selectable faces — neon analog dial, terminal digital, and orbit. Pick a style with the tabs at the top while the anchor is in view. Events still use `public/js/wall-display.js` for multi-line text overlays.
 
 ## Events dashboard AR
 

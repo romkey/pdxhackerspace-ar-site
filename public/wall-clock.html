@@ -4,9 +4,10 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" />
     <title>Wall clock AR</title>
+    <link rel="stylesheet" href="css/wall-clock.css" />
+    <link rel="stylesheet" href="css/site-footer.css" />
     <script src="https://aframe.io/releases/1.6.0/aframe.min.js"></script>
     <script src="https://raw.githack.com/AR-js-org/AR.js/3.4.8/aframe/build/aframe-ar.js"></script>
-    <script src="js/wall-display.js"></script>
     <style>
       body {
         margin: 0;
@@ -32,7 +33,35 @@
     </style>
   </head>
   <body class="ar-page">
+    <p class="hint" id="hint">
       Point your camera at the clock anchor on the poster.
+    </p>
+
+    <div id="wall-clock" class="wall-clock" aria-live="polite">
+      <div id="wall-clock-picker" class="wall-clock__picker"></div>
+      <div class="wall-clock__stage">
+        <div
+          class="clock-face clock-face--analog"
+          data-face="analog"
+          role="tabpanel"
+          aria-label="Neon dial clock"
+        ></div>
+        <div
+          class="clock-face clock-face--digital"
+          data-face="digital"
+          role="tabpanel"
+          aria-label="Terminal clock"
+          hidden
+        ></div>
+        <div
+          class="clock-face clock-face--orbit"
+          data-face="orbit"
+          role="tabpanel"
+          aria-label="Orbit clock"
+          hidden
+        ></div>
+      </div>
+    </div>
 
     <a-scene
       embedded
@@ -48,43 +77,12 @@
         emitevents="true"
         smooth="true"
         smoothCount="5"
-      >
-        <a-entity position="0 0.55 0" rotation="-90 0 0">
-          <a-plane
-            width="1.35"
-            height="0.42"
-            material="color: #0d1117; opacity: 0.92; transparent: true; shader: flat"
-          ></a-plane>
-          <a-text
-            wall-display
-            align="center"
-            color="#f0f6fc"
-            width="2.8"
-            wrap-count="24"
-            position="0 0 0.01"
-            scale="1 1 1"
-          ></a-text>
-        </a-entity>
-      </a-marker>
+      ></a-marker>
 
       <a-entity camera></a-entity>
     </a-scene>
 
-    <script>
-      (function () {
-        var marker = document.querySelector("#clock-marker");
-        var hint = document.querySelector("#hint");
-        if (!marker || !hint) return;
-
-        marker.addEventListener("markerFound", function () {
-          hint.classList.add("is-hidden");
-        });
-        marker.addEventListener("markerLost", function () {
-          hint.classList.remove("is-hidden");
-        });
-      })();
-    </script>
-    <link rel="stylesheet" href="css/site-footer.css" />
+    <script type="module" src="js/wall-clock.js"></script>
     <script src="js/site-footer.js"></script>
   </body>
 </html>
