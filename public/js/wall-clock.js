@@ -16,26 +16,45 @@ let root = null;
 let picker = null;
 /** @type {Record<string, HTMLElement>} */
 const faceEls = {};
-/** @type {string} */
-let activeFace = normalizeClockFace(
-  typeof localStorage !== "undefined"
-    ? localStorage.getItem(STORAGE_KEY)
-    : null
-);
+
+// localStorage access can throw (blocked storage, private/embedded contexts on
+// some mobile browsers). Guarding it is critical: an unguarded throw here would
+// kill the whole module before the marker/visibility wiring runs, leaving a
+// blank screen even though everything else is fine.
+function readStoredFace() {
+  try {
+    return localStorage.getItem(STORAGE_KEY);
+  } catch {
+    return null;
+  }
+}
+
+function writeStoredFace(value) {
+  try {
+    localStorage.setItem(STORAGE_KEY, value);
+  } catch {
+    /* ignore quota / blocked storage */
+  }
+}
+
+let activeFace = normalizeClockFace(readStoredFace());
 
 function init() {
   root = document.getElementById("wall-clock");
   picker = document.getElementById("wall-clock-picker");
   if (!root || !picker) return;
 
+  // Wire up marker visibility FIRST so the overlay can appear even if any
+  // later rendering step were to fail.
+  bindMarker();
+
   CLOCK_FACE_IDS.forEach(function (id) {
-    const el = root.querySelector(`[data-face="${id}"]`);
+    const el = root.querySelector(`.clock-face[data-face="${id}"]`);
     if (el) faceEls[id] = el;
   });
 
   buildPicker();
   setActiveFace(activeFace, { persist: false });
-  bindMarker();
   tick();
   setInterval(tick, 250);
 }
@@ -80,17 +99,21 @@ function setActiveFace(id, options = {}) {
   });
 
   if (options.persist !== false) {
-    try {
-      localStorage.setItem(STORAGE_KEY, activeFace);
-    } catch {
-      /* ignore quota / private mode */
-    }
+    writeStoredFace(activeFace);
   }
 
   tick();
 }
 
 function tick() {
+  try {
+    renderFaces();
+  } catch (err) {
+    if (typeof console !== "undefined") console.error("clock render failed", err);
+  }
+}
+
+function renderFaces() {
   const now = new Date();
 
   const analog = faceEls.analog;

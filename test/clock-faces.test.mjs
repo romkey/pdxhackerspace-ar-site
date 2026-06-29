@@ -135,4 +135,13 @@ describe("wall clock page assets", () => {
     assert.match(js, /object3D\.visible/);
     assert.match(js, /requestAnimationFrame/);
   });
+
+  it("wall-clock.js guards localStorage so blocked storage can't blank it", () => {
+    const js = fs.readFileSync(path.join(ROOT, "public/js/wall-clock.js"), "utf8");
+    // An unguarded localStorage access throws on some mobile/embedded browsers,
+    // which would kill the whole module before the marker wiring runs.
+    assert.doesNotMatch(js, /^\s*let activeFace = normalizeClockFace\(\s*$/m);
+    assert.match(js, /function readStoredFace/);
+    assert.match(js, /catch\s*\{/);
+  });
 });

@@ -89,7 +89,7 @@ For local `npm start` there is no proxy, so the events page only works against a
 
 ### Print preview
 
-If a printer has a Home Assistant camera/image entity with the current job's thumbnail, the HUD shows it. The backend proxies it at `/api/printer/<id>/preview` so the HA token never reaches the browser. The entity is taken from `PRINTER_<N>_PREVIEW_ENTITY`, or auto-derived from the sensor prefix (`sensor.prusa` → `camera.prusa`); set the var to empty to disable. When no preview is available the panel shows a printer placeholder graphic.
+If a printer has a Home Assistant camera entity with the current job's thumbnail, the HUD shows it. The backend proxies it at `/api/printer/<id>/preview` so the HA token never reaches the browser. The entity is taken from `PRINTER_<N>_PREVIEW_ENTITY`, or auto-derived from the sensor prefix (`sensor.prusa` → `camera.prusa_job_preview`, falling back to `camera.prusa`); set the var to empty to disable. PrusaLink only publishes this thumbnail **while a print is running**, so the preview appears during active prints — when it's unavailable (idle, or no thumbnail) the panel shows a printer placeholder graphic.
 
 ### Why a backend?
 
@@ -104,7 +104,7 @@ The HA REST API requires a long-lived bearer token, which must never reach the b
 | `PRINTER_REFRESH_SECONDS` | `10` | Browser polling interval. |
 | `PRINTER_<N>_NAME` | _(unset)_ | Display name for printer N (start at 0). |
 | `PRINTER_<N>_SENSOR_PREFIX` | _(unset)_ | HA entity prefix; the backend appends `_progress`, `_filename`, `_nozzle_temperature`, etc. |
-| `PRINTER_<N>_PREVIEW_ENTITY` | _(derived)_ | HA camera/image entity for the job preview thumbnail. Defaults to `camera.<device>` derived from the sensor prefix; set empty to disable. |
+| `PRINTER_<N>_PREVIEW_ENTITY` | _(derived)_ | HA camera entity for the job preview thumbnail. Defaults to `camera.<device>_job_preview` derived from the sensor prefix (falls back to `camera.<device>`); set empty to disable. Only available while printing. |
 
 For a PrusaLink device named `prusa_mk4`, use `PRINTER_0_SENSOR_PREFIX=sensor.prusa_mk4`. The backend looks up the following suffixes per printer and gracefully ignores any that don't exist:
 

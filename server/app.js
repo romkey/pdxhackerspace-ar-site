@@ -20,14 +20,56 @@ const SENSOR_FIELDS = [
 
 /**
  * Derive a default preview camera entity from a sensor prefix.
- * The HA PrusaLink integration exposes a `camera.<device>` thumbnail
- * alongside the `sensor.<device>_*` sensors, so `sensor.prusa` →
- * `camera.prusa` is a sensible default when no explicit entity is set.
+ *
+ * The HA PrusaLink integration exposes a job-preview camera whose entity_id is
+ * `camera.<device>_job_preview` (translation key "job_preview"), alongside the
+ * `sensor.<device>_*` sensors. So `sensor.prusa` → `camera.prusa_job_preview`
+ * is the right default when no explicit entity is set.
+ *
+ * NOTE: PrusaLink only makes this camera available while a print is running
+ * (its `available` is false when the printer is idle), so the preview only
+ * appears during active prints.
  */
 function derivePreviewEntity(prefix) {
   if (!prefix) return '';
   const m = /^sensor\.(.+)$/.exec(prefix);
-  return m ? `camera.${m[1]}` : '';
+  return m ? `camera.${m[1]}_job_preview` : '';
+}
+
+/**
+ * Ordered list of camera entities to try for a printer's preview thumbnail:
+ * the configured/derived entity first, then the `_job_preview` and bare
+ * `camera.<device>` variants derived from the sensor prefix (covers naming
+ * differences across HA/PrusaLink versions).
+ */
+function previewCandidates(printer) {
+  const list = [];
+  if (printer.preview) list.push(printer.preview);
+  const m = /^sensor\.(.+)$/.exec(printer.prefix || '');
+  if (m) {
+    [`camera.${m[1]}_job_preview`, `camera.${m[1]}`].forEach((entity) => {
+      if (!list.includes(entity)) list.push(entity);
+    });
+  }
+  return list;
+}
+
+/**
+ * Find the first candidate camera entity that currently exposes a thumbnail.
+ * @returns {Promise<{entity_id: string, picture: string} | null>}
+ */
+async function resolvePreview(printer, fetchHAState) {
+  for (const entityId of previewCandidates(printer)) {
+    let state;
+    try {
+      state = await fetchHAState(entityId);
+    } catch {
+      continue;
+    }
+    const picture = resolveEntityPicture(state);
+    if (picture) return { entity_id: entityId, picture };
+  }
+  return null;
 }
 
 function loadPrinters(env = process.env) {
@@ -241,11 +283,15 @@ async function getPrinterStatus(printer, fetchHAState) {
   );
 
   result.preview = { available: false };
-  if (printer.preview) {
-    result.preview.entity_id = printer.preview;
+  const candidates = previewCandidates(printer);
+  if (candidates.length > 0) {
+    result.preview.entity_id = candidates[0];
     try {
-      const state = await fetchHAState(printer.preview);
-      result.preview.available = Boolean(resolveEntityPicture(state));
+      const resolved = await resolvePreview(printer, fetchHAState);
+      if (resolved) {
+        result.preview.available = true;
+        result.preview.entity_id = resolved.entity_id;
+      }
     } catch (err) {
       result.errors.preview = err.message;
     }
@@ -304,18 +350,17 @@ function createApp(options = {}) {
           sendJson(res, 404, { error: `No printer configured with id ${id}` });
           return;
         }
-        if (!printer.preview) {
+        if (previewCandidates(printer).length === 0) {
           sendJson(res, 404, { error: 'No preview configured for this printer' });
           return;
         }
         try {
-          const state = await fetchHAState(printer.preview);
-          const picture = resolveEntityPicture(state);
-          if (!picture) {
+          const resolved = await resolvePreview(printer, fetchHAState);
+          if (!resolved) {
             sendJson(res, 404, { error: 'No preview image available' });
             return;
           }
-          const image = await fetchHABinary(picture);
+          const image = await fetchHABinary(resolved.picture);
           res.writeHead(200, {
             'Content-Type': image.contentType,
             'Content-Length': image.body.length,
@@ -356,6 +401,8 @@ module.exports = {
   SENSOR_FIELDS,
   loadPrinters,
   derivePreviewEntity,
+  previewCandidates,
+  resolvePreview,
   resolveEntityPicture,
   createFetchHAState,
   createFetchHABinary,

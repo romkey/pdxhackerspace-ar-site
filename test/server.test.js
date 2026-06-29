@@ -5,6 +5,7 @@ const assert = require('node:assert/strict');
 const {
   loadPrinters,
   derivePreviewEntity,
+  previewCandidates,
   resolveEntityPicture,
   getPrinterStatus,
   createApp,
@@ -76,13 +77,13 @@ describe('loadPrinters', () => {
       id: 0,
       name: 'Alpha',
       prefix: 'sensor.alpha',
-      preview: 'camera.alpha',
+      preview: 'camera.alpha_job_preview',
     });
     assert.deepEqual(printers[1], {
       id: 1,
       name: 'Beta',
       prefix: 'sensor.beta',
-      preview: 'camera.beta',
+      preview: 'camera.beta_job_preview',
     });
   });
 
@@ -99,12 +100,12 @@ describe('loadPrinters', () => {
     assert.equal(printers[1].name, 'Printer 2');
   });
 
-  it('derives a camera preview entity from the sensor prefix', () => {
+  it('derives a job-preview camera entity from the sensor prefix', () => {
     const printers = loadPrinters({
       PRINTER_0_NAME: 'Prusa',
       PRINTER_0_SENSOR_PREFIX: 'sensor.prusa',
     });
-    assert.equal(printers[0].preview, 'camera.prusa');
+    assert.equal(printers[0].preview, 'camera.prusa_job_preview');
   });
 
   it('honors an explicit preview entity and allows disabling', () => {
@@ -120,13 +121,29 @@ describe('loadPrinters', () => {
 });
 
 describe('derivePreviewEntity', () => {
-  it('maps sensor.* to camera.*', () => {
-    assert.equal(derivePreviewEntity('sensor.prusa'), 'camera.prusa');
+  it('maps sensor.* to the job-preview camera', () => {
+    assert.equal(derivePreviewEntity('sensor.prusa'), 'camera.prusa_job_preview');
   });
 
   it('returns empty for non-sensor or missing prefixes', () => {
     assert.equal(derivePreviewEntity('binary_sensor.x'), '');
     assert.equal(derivePreviewEntity(''), '');
+  });
+});
+
+describe('previewCandidates', () => {
+  it('lists configured, job-preview, and bare camera variants', () => {
+    assert.deepEqual(
+      previewCandidates({ prefix: 'sensor.prusa', preview: 'camera.prusa_job_preview' }),
+      ['camera.prusa_job_preview', 'camera.prusa']
+    );
+  });
+
+  it('puts an explicit override first', () => {
+    assert.deepEqual(
+      previewCandidates({ prefix: 'sensor.prusa', preview: 'camera.custom' }),
+      ['camera.custom', 'camera.prusa_job_preview', 'camera.prusa']
+    );
   });
 });
 
@@ -198,17 +215,40 @@ describe('getPrinterStatus', () => {
     assert.match(status.errors._global, /prefix/i);
   });
 
-  it('marks preview available when the camera has a thumbnail', async () => {
+  it('marks preview available when the job-preview camera has a thumbnail', async () => {
     const printer = {
       id: 0,
       name: 'Prusa',
       prefix: 'sensor.prusa',
-      preview: 'camera.prusa',
+      preview: 'camera.prusa_job_preview',
     };
+    const fetchHAState = mockFetch({
+      'camera.prusa_job_preview': {
+        entity_id: 'camera.prusa_job_preview',
+        state: 'printing',
+        attributes: {
+          entity_picture: '/api/camera_proxy/camera.prusa_job_preview?token=x',
+        },
+      },
+    });
+
+    const status = await getPrinterStatus(printer, fetchHAState);
+    assert.equal(status.preview.available, true);
+    assert.equal(status.preview.entity_id, 'camera.prusa_job_preview');
+  });
+
+  it('falls back to the bare camera entity for the preview', async () => {
+    const printer = {
+      id: 0,
+      name: 'Prusa',
+      prefix: 'sensor.prusa',
+      preview: 'camera.prusa_job_preview',
+    };
+    // Only the bare camera.prusa exists (older naming) — resolve should find it.
     const fetchHAState = mockFetch({
       'camera.prusa': {
         entity_id: 'camera.prusa',
-        state: 'idle',
+        state: 'printing',
         attributes: { entity_picture: '/api/camera_proxy/camera.prusa?token=x' },
       },
     });
@@ -223,7 +263,7 @@ describe('getPrinterStatus', () => {
       id: 0,
       name: 'Prusa',
       prefix: 'sensor.prusa',
-      preview: 'camera.prusa',
+      preview: 'camera.prusa_job_preview',
     };
     const status = await getPrinterStatus(printer, mockFetch({}));
     assert.equal(status.preview.available, false);
@@ -297,13 +337,20 @@ describe('createApp', () => {
   it('GET /api/printer/:id/preview streams the proxied image', async () => {
     const app = createApp({
       printers: [
-        { id: 0, name: 'Prusa', prefix: 'sensor.prusa', preview: 'camera.prusa' },
+        {
+          id: 0,
+          name: 'Prusa',
+          prefix: 'sensor.prusa',
+          preview: 'camera.prusa_job_preview',
+        },
       ],
       fetchHAState: mockFetch({
-        'camera.prusa': {
-          entity_id: 'camera.prusa',
-          state: 'idle',
-          attributes: { entity_picture: '/api/camera_proxy/camera.prusa?token=x' },
+        'camera.prusa_job_preview': {
+          entity_id: 'camera.prusa_job_preview',
+          state: 'printing',
+          attributes: {
+            entity_picture: '/api/camera_proxy/camera.prusa_job_preview?token=x',
+          },
         },
       }),
       fetchHABinary: async (path) => {
@@ -320,7 +367,7 @@ describe('createApp', () => {
 
   it('GET /api/printer/:id/preview 404 when no preview configured', async () => {
     const app = createApp({
-      printers: [{ id: 0, name: 'P', prefix: 'sensor.p', preview: '' }],
+      printers: [{ id: 0, name: 'P', prefix: '', preview: '' }],
     });
     const res = await request(app, '/api/printer/0/preview');
 
@@ -331,7 +378,12 @@ describe('createApp', () => {
   it('GET /api/printer/:id/preview 404 when the camera has no image', async () => {
     const app = createApp({
       printers: [
-        { id: 0, name: 'Prusa', prefix: 'sensor.prusa', preview: 'camera.prusa' },
+        {
+          id: 0,
+          name: 'Prusa',
+          prefix: 'sensor.prusa',
+          preview: 'camera.prusa_job_preview',
+        },
       ],
       fetchHAState: mockFetch({}),
     });
